@@ -25,7 +25,7 @@ resource "oci_identity_domains_dynamic_resource_group" "search-bastion-dyngroup"
     #Required
     display_name = "${var.prefix}-bastion-dyngroup"
     idcs_endpoint = local.idcs_url
-    matching_rule = "ALL {resource.id = '${oci_core_instance.starter_bastion.id}'}"
+    matching_rule = "ALL {instance.id = '${oci_core_instance.starter_bastion.id}'}"
     schemas = ["urn:ietf:params:scim:schemas:oracle:idcs:DynamicResourceGroup"]
 }
 
