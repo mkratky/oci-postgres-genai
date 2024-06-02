@@ -29,10 +29,9 @@ echo "--------------------------"
 # echo "TENANCY_NAME=$TENANCY_NAME"
 echo
 echo "-- STREAMING CONNECTION --------------------------"
-echo "STREAM_BOOSTRAPSERVER=$STREAM_BOOSTRAPSERVER"
+echo "STREAM_MESSAGE_ENDPOINT=$STREAM_MESSAGE_ENDPOINT"
 echo "STREAM_OCID=$STREAM_OCID"
 echo "STREAM_USERNAME=$TENANCY_NAME/$TF_VAR_username/$STREAM_OCID"
-echo "AUTH_TOKEN=$TF_VAR_auth_token"
 echo
 echo "-- FUNCTION CONNECTION ---------------------------"
 echo "FUNCTION_ENDPOINT=$FN_INVOKE_ENDPOINT/20181201/functions/$FN_OCID"
