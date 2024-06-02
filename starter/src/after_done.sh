@@ -7,7 +7,7 @@ cd $ROOT_DIR
 
 get_attribute_from_tfstate "STREAM_OCID" "starter_stream" "id"
 get_attribute_from_tfstate "TENANCY_NAME" "tenant_details" "name"
-get_attribute_from_tfstate "STREAM_MESSAGE_ENDPOINT" "starter_stream" "instances[0].messages_endpoint"
+get_attribute_from_tfstate "STREAM_MESSAGE_ENDPOINT" "starter_stream" "messages_endpoint"
 # Not used anymore ?
 get_attribute_from_tfstate "STREAM_POOL_OCID" "starter_stream_pool" "id"
 get_attribute_from_tfstate "STREAM_BOOSTRAPSERVER" "starter_stream_pool" "kafka_settings[0].bootstrap_servers"
