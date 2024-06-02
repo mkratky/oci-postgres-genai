@@ -6,22 +6,22 @@
     "eventTime": "2024-06-02T10:58:07Z",
     "contentType": "application/json",
     "data": {
-        "compartmentId": "ocid1.compartment.oc1..aaaaaaaahdfddpnlmkao6xovsxzyigsndpo5rljjnmn6bc3xqlgyjou7fi5a",
+        "compartmentId": "ocid1.compartment.oc1..xxxxxxx",
         "compartmentName": "devops",
         "resourceName": "country.pdf",
-        "resourceId": "/n/fr03kzmuvhtf/b/psql-public-bucket/o/country.pdf",
+        "resourceId": "/n/xxxxxx/b/psql-public-bucket/o/country.pdf",
         "availabilityDomain": "FRA-AD-2",
         "additionalDetails": {
             "bucketName": "psql-public-bucket",
             "versionId": "9dc3cb21-4cb1-4753-b649-de7e604f0527",
             "archivalState": "Available",
-            "namespace": "fr03kzmuvhtf",
-            "bucketId": "ocid1.bucket.oc1.eu-frankfurt-1.aaaaaaaanes5v4vizxnn2sk4txvstgthqwp5jekcba43f7v6razrhjnlmaqq",
+            "namespace": "xxxxxx",
+            "bucketId": "ocid1.bucket.oc1.eu-frankfurt-1.xxxxxx",
             "eTag": "94052a11-c7f5-4d4d-8ebb-e8d0fa1dfd97"
         }
     },
     "eventID": "14ae6f36-d335-3d04-1604-cc7e2c43e0b3",
     "extensions": {
-        "compartmentId": "ocid1.compartment.oc1..aaaaaaaahdfddpnlmkao6xovsxzyigsndpo5rljjnmn6bc3xqlgyjou7fi5a"
+        "compartmentId": "ocid1.compartment.oc1..xxxxxxx"
     }
 }
