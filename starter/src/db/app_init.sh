@@ -13,6 +13,10 @@ export TF_VAR_compartment_ocid=`cat /tmp/instance.json | jq -r .compartmentId`
 # Create an APP service
 APP_DIR=db
 
+### XXXXXXX
+env
+### XXXXXXX
+
 CONFIG_FILE=${APP_DIR}/start.sh
 sed -i "s/##DB_USER##/$DB_USER/" $CONFIG_FILE
 sed -i "s/##DB_PASSWORD##/$DB_PASSWORD/" $CONFIG_FILE
