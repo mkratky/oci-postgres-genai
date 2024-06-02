@@ -1,43 +1,61 @@
-import os
-import traceback
-from flask import Flask
-from flask import jsonify
-from flask_cors import CORS
-import psycopg2
+import oci
+import time
 
-app = Flask(__name__)
-CORS(app)
+from base64 import b64decode
 
-@app.route('/dept')
-def dept():
-    a = []
+ociMessageEndpoint = os.getenv('STREAM_BOOSTRAPSERVER')
+ociStreamOcid = os.getenv('STREAM_OCID')
+
+def generate_signer_from_instance_principals(self):
     try:
-        conn = psycopg2.connect(
-            host=os.getenv('DB_URL'),
-            database="postgres",
-            user=os.getenv('DB_USER'),
-            password=os.getenv('DB_PASSWORD'),
-            sslmode='require' )
-        print("Successfully connected to database", flush=True)
-        cursor = conn.cursor()
-        cursor.execute("SELECT deptno, dname, loc FROM dept")
-        deptRows = cursor.fetchall()
-        for row in deptRows:
-            a.append( {"deptno": row[0], "dname": row[1], "loc": row[2]} )        
-    except Exception as e:
-        print(traceback.format_exc(), flush=True)
-        print(e, flush=True)
-    finally:
-        cursor.close() 
-        conn.close() 
-    response = jsonify(a)
-    response.status_code = 200
-    return response   
+        # get signer from instance principals token
+        self.signer = oci.auth.signers.InstancePrincipalsSecurityTokenSigner()
+    except Exception:
+        print("There was an error while trying to get the Signer")
+        raise SystemExit   
+    # generate config info from signer
+    self.config = {'region': self.signer.region, 'tenancy': self.signer.tenancy_id}
 
-@app.route('/info')
-def info():
-        return "Python - Flask - PSQL"          
 
-if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=8080)
+def get_cursor_by_group(sc, sid, group_name, instance_name):
+    print(" Creating a cursor for group {}, instance {}".format(group_name, instance_name))
+    cursor_details = oci.streaming.models.CreateGroupCursorDetails(group_name=group_name, instance_name=instance_name,
+                                                                   type=oci.streaming.models.
+                                                                   CreateGroupCursorDetails.TYPE_TRIM_HORIZON,
+                                                                   commit_on_get=True)
+    response = sc.create_group_cursor(sid, cursor_details)
+    return response.data.value
 
+def simple_message_loop(client, stream_id, initial_cursor):
+    cursor = initial_cursor
+    while True:
+        get_response = client.get_messages(stream_id, cursor, limit=10)
+        # No messages to process. return.
+        if not get_response.data:
+            return
+
+        # Process the messages
+        print(" Read {} messages".format(len(get_response.data)))
+        for message in get_response.data:
+            if message.key is None:
+                key = "Null"
+            else:
+                key = b64decode(message.key.encode()).decode()
+            print("{}: {}".format(key,
+                                  b64decode(message.value.encode()).decode()))
+
+        # get_messages is a throttled method; clients should retrieve sufficiently large message
+        # batches, as to avoid too many http requests.
+        time.sleep(1)
+        # use the next-cursor for iteration
+        cursor = get_response.headers["opc-next-cursor"]
+
+generate_signer_from_instance_principals()
+config = oci.config.from_file(ociConfigFilePath, ociProfileName)
+stream_client = oci.streaming.StreamClient(config, service_endpoint=ociMessageEndpoint)
+
+# A cursor can be created as part of a consumer group.
+# Committed offsets are managed for the group, and partitions
+# are dynamically balanced amongst consumers in the group.
+group_cursor = get_cursor_by_group(stream_client, ociStreamOcid, "example-group", "example-instance-1")
+simple_message_loop(stream_client, ociStreamOcid, group_cursor)

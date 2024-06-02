@@ -10,6 +10,6 @@ export STREAM_OCID="##STREAM_OCID##"
 export STREAM_BOOSTRAPSERVER="##STREAM_BOOSTRAPSERVER##"
 export FUNCTION_ENDPOINT="##FUNCTION_ENDPOINT##"
 
-python3.9 server.py 2>&1 | tee app.log
+python3.9 app.py 2>&1 | tee app.log
 
 
