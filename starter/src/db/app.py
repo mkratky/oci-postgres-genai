@@ -7,7 +7,7 @@ from base64 import b64decode
 class app(object):
 
     def __init__(self):
-        ociMessageEndpoint = os.getenv('STREAM_BOOSTRAPSERVER')
+        ociMessageEndpoint = os.getenv('STREAM_MESSAGE_ENDPOINT')
         ociStreamOcid = os.getenv('STREAM_OCID')
 
         self.generate_signer_from_instance_principals()

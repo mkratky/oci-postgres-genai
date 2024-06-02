@@ -5,9 +5,12 @@ cd $ROOT_DIR
 
 . ./env.sh
 
-get_attribute_from_tfstate "STREAM_BOOSTRAPSERVER" "starter_stream_pool" "kafka_settings[0].bootstrap_servers"
-get_attribute_from_tfstate "STREAM_OCID" "starter_stream_pool" "id"
+get_attribute_from_tfstate "STREAM_OCID" "starter_stream" "id"
 get_attribute_from_tfstate "TENANCY_NAME" "tenant_details" "name"
+get_attribute_from_tfstate "STREAM_MESSAGE_ENDPOINT" "starter_stream" "instances[0].messages_endpoint"
+# Not used anymore ?
+get_attribute_from_tfstate "STREAM_POOL_OCID" "starter_stream_pool" "id"
+get_attribute_from_tfstate "STREAM_BOOSTRAPSERVER" "starter_stream_pool" "kafka_settings[0].bootstrap_servers"
 
 get_attribute_from_tfstate "FN_OCID" "starter_fn_function" "id"
 get_attribute_from_tfstate "FN_INVOKE_ENDPOINT" "starter_fn_function" "invoke_endpoint"
@@ -34,4 +37,4 @@ echo
 echo "-- FUNCTION CONNECTION ---------------------------"
 echo "FUNCTION_ENDPOINT=$FN_INVOKE_ENDPOINT/20181201/functions/$FN_OCID"
 
-ssh -o StrictHostKeyChecking=no -i $TF_VAR_ssh_private_path opc@$BASTION_IP "export FUNCTION_ENDPOINT=\"$FUNCTION_ENDPOINT\";export STREAM_BOOSTRAPSERVER=\"$STREAM_BOOSTRAPSERVER\";export STREAM_OCID=\"$STREAM_OCID\";export DB_USER=\"$TF_VAR_db_user\";export DB_PASSWORD=\"$TF_VAR_db_password\";export DB_URL=\"$DB_URL\"; bash db/app_init.sh 2>&1 | tee -a db/app_init.log"
+ssh -o StrictHostKeyChecking=no -i $TF_VAR_ssh_private_path opc@$BASTION_IP "export FN_OCID=\"$FN_OCID\";export STREAM_MESSAGE_ENDPOINT=\"$STREAM_MESSAGE_ENDPOINT\";export STREAM_OCID=\"$STREAM_OCID\";export DB_USER=\"$TF_VAR_db_user\";export DB_PASSWORD=\"$TF_VAR_db_password\";export DB_URL=\"$DB_URL\"; bash db/app_init.sh 2>&1 | tee -a db/app_init.log"
