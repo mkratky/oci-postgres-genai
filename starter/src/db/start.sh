@@ -9,6 +9,7 @@ export DB_URL="##DB_URL##"
 export STREAM_OCID="##STREAM_OCID##"
 export STREAM_MESSAGE_ENDPOINT="##STREAM_MESSAGE_ENDPOINT##"
 export FN_OCID="##FN_OCID##"
+export FN_INVOKE_ENDPOINT="##FN_INVOKE_ENDPOINT##"
 
 python3.9 app.py 2>&1 | tee app.log
 
