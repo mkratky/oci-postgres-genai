@@ -1,5 +1,11 @@
+# FLASK
 Flask
 flask-cors
+
+#POSTGRES
 psycopg2-binary
+
+# OCI
+oci
 
 
