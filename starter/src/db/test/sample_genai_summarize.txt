@@ -1,0 +1,24 @@
+{
+  "input" : "xxxxx",
+  "servingMode" : {
+    "modelId" : "cohere.command",
+    "servingType" : "ON_DEMAND"
+  },
+  "temperature" : 1,
+  "length" : "AUTO",
+  "extractiveness" : "AUTO",
+  "format" : "AUTO",
+  "additionalCommand" : "",
+  "compartmentId" : "xxxx"
+}
+
+---
+
+{
+  "id" : "xxx",
+  "summary" : "xxxx",
+  "modelId" : "cohere.command",
+  "modelVersion" : "14.2"
+}
+
+

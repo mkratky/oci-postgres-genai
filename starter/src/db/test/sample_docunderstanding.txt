@@ -1,0 +1,43 @@
+POST RestDocumentUnderstandingStorage/document 
+input
+{ "compartmentId" : "ocid.compartment.xxxxx", "bucketName" : "opensearch-bucket", "namespaceName" : "frsxwtjslf35", "objectName" : "Belgian_ID.png" }
+
+output
+
+{ "id" : "id" }
+-> Nothing
+
+POST /20221109/processorJobs
+Input
+{
+    "processorConfig": {
+        "language": "ENG",
+        "processorType": "GENERAL",
+        "features": [
+            {
+                "featureType": "TEXT_EXTRACTION"
+            }
+        ],
+        "isZipOutputEnabled": false
+    },
+    "compartmentId": "ocid1.compartment.oc1..aaaaaaaaociwxf74o7snuti7isddz3ieixricjbkkgbi6osgbq7eafcaaxva",
+    "inputLocation": {
+        "sourceType": "OBJECT_STORAGE_LOCATIONS",
+        "objectLocations": [
+            {
+                "bucketName": "docrepository",
+                "namespaceName": "fr9qm01oq44x",
+                "objectName": "shakespeare_macbeth.jpg"
+            }
+        ]
+    },
+    "outputLocation": {
+        "namespaceName": "fr9qm01oq44x",
+        "bucketName": "docrepository-extract",
+        "prefix": "document"
+    }
+}
+
+Output
+{ "id" : "ocid1.aidocumentprocessorjob.oc1.eu-frankfurt-1.amaaaaaaldij5aiavr6qoinuifsn4idtqxfj5yxvfq5iiypfutgywkxtfoua", "compartmentId" : "ocid1.compartment.oc1..aaaaaaaaociwxf74o7snuti7isddz3ieixricjbkkgbi6osgbq7eafcaaxva", "displayName" : null, "features" : [ { "featureType" : "TEXT_EXTRACTION", "generateSearchablePdf" : null, "selectionMarkDetection" : null } ], "language" : "ENG", "documentType" : null, "inputLocation" : { "sourceType" : "OBJECT_STORAGE_LOCATIONS", "objectLocations" : [ { "namespaceName" : "fr9qm01oq44x", "bucketName" : "docrepository", "objectName" : "shakespeare_macbeth.jpg" } ] }, "timeAccepted" : "2023-04-27T09:58:52.169Z", "timeStarted" : "2023-04-27T09:58:52.169Z", "timeFinished" : "2023-04-27T09:58:52.169Z", "percentComplete" : 100.0, "outputLocation" : { "namespaceName" : "fr9qm01oq44x", "bucketName" : "docrepository-extract", "prefix" : "doc" }, "lifecycleState" : "SUCCEEDED", "isZipOutputEnabled" : false, "lifecycleDetails" : null }
+
