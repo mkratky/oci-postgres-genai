@@ -1,0 +1,20 @@
+'https://inference.generativeai.us-chicago-1.oci.oraclecloud.com/20231130/actions/embedText'
+
+Input:
+{
+  "inputs" : [ "hello", "hi" ],
+  "servingMode" : {
+    "servingType" : "ON_DEMAND",
+    "modelId" : "cohere.embed-english-light-v2.0"
+  },
+  "truncate" : "START",
+  "compartmentId" : "ocid1.compartment.oc1..aaaaaaaa4lwvzifc7ccwfv2fthpjys25b4ogazljgqfyk26eh2cnkhjcr6ka"
+}
+
+Output:
+{
+  "id" : "5a324654-3d33-4dcf-bf10-84fcaa07f00c",
+  "embeddings" : [ [ -2.5722656, 0.5258789, 1.6328125, -1.3623047, -0.35546875, 0.9448242, 0.84716797, 0.81103516, -0.5307617, 0.6484375, -0.92578125, -0.65478516, -0.375, 0.6098633, 0.14404297, 0.37768555 ] ],
+  "modelId" : "ocid1.generativeaimodel.oc1.us-chicago-1.amaaaaaapi24rzaauhcci2xuk7263dbon4xnkjku5ifv6i45nzbz6rrn4joa",
+  "modelVersion" : "2.0"
+}

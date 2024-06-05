@@ -1,0 +1,102 @@
+POST /xxx/transcriptionJobs 
+create_transcription_job
+{
+      "normalization": {
+            "isPunctuationEnabled": true
+      },
+      "compartmentId": "ocid1.compartment.oc1..aaaaaaaamz7s4ggnwu2bwg22jnwbtw4yu34fzniuidnijbrbj322i6c7unna",
+      "displayName": "test2",
+      "freeformTags": {
+            "EXAMPLE_KEY_06hLY": "EXAMPLE_VALUE_6TXla82ilDe8m8GHyLu7"
+      },
+      "definedTags": {
+            "EXAMPLE_KEY_SZrCS": {
+                  "EXAMPLE_KEY_ZYS8M": "EXAMPLE--Value"
+            }
+      },
+      "modelDetails": {
+            "domain": "GENERIC",
+            "languageCode": "en-US"
+      },
+      "inputLocation": {
+            "locationType": "OBJECT_LIST_INLINE_INPUT_LOCATION",
+            "objectLocations": [
+                  {
+                        "namespaceName": "idpeb8inzeyz",
+                        "bucketName": "bucket-opensearch",
+                        "objectNames": [
+                              "video1329953048.mp4"
+                        ]
+                  }
+            ]
+      },
+      "outputLocation": {
+            "namespaceName": "idpeb8inzeyz",
+            "bucketName": "bucket-opensearch",
+            "prefix": "test2"
+      },
+      "additionalTranscriptionFormats": [
+            "SRT"
+      ]
+}
+
+Output
+
+{
+      "id": "id",
+      "displayName": "displayName",
+      "compartmentId": "compartmentId",
+      "description": "description",
+      "modelDetails": {
+            "domain": "GENERIC",
+            "languageCode": "en-US"
+      },
+      "normalization": {
+            "isPunctuationEnabled": true,
+            "filters": [
+                  {
+                        "type": "PROFANITY",
+                        "mode": "REMOVE"
+                  }
+            ]
+      },
+      "timeAccepted": "2015-03-25",
+      "timeStarted": "2015-03-25",
+      "timeFinished": "2015-03-25",
+      "totalTasks": 1,
+      "outstandingTasks": 1,
+      "successfulTasks": 0,
+      "ttlInDays": 1,
+      "percentComplete": 0,
+      "inputLocation": {
+            "locationType": "OBJECT_LIST_FILE_INPUT_LOCATION",
+            "objectLocations": [
+                  {
+                        "namespaceName": "EXAMPLE-namespaceName-Value",
+                        "bucketName": "EXAMPLE-bucketName-Value",
+                        "objectNames": [
+                              "EXAMPLE--Value"
+                        ]
+                  }
+            ]
+      },
+      "outputLocation": {
+            "namespaceName": "EXAMPLE-namespaceName-Value",
+            "bucketName": "EXAMPLE-bucketName-Value",
+            "prefix": "EXAMPLE-prefix-Value"
+      },
+      "createdBy": "createdBy",
+      "additionalTranscriptionFormats": [
+            "SRT"
+      ],
+      "lifecycleState": "ACCEPTED",
+      "lifecycleDetails": "lifecycleDetails",
+      "freeformTags": {
+            "EXAMPLE_KEY_06hLY": "EXAMPLE_VALUE_6TXla82ilDe8m8GHyLu7"
+      },
+      "definedTags": {
+            "EXAMPLE_KEY_SZrCS": {
+                  "EXAMPLE_KEY_ZYS8M": "EXAMPLE--Value"
+            }
+      }
+}

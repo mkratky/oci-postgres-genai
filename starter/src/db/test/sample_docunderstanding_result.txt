@@ -1,0 +1,40 @@
+{
+      "documentMetadata": {
+            "pageCount": 3,
+            "mimeType": "application/pdf"
+      },
+      "pages": [
+            {
+                  "pageNumber": 1,
+                  "lines": [
+                        {
+                              "text": "ORACLE"
+                        },
+                        {
+                              "text": "ANNEX TO TERMS & CONDITIONS OF THE CONTRACT OF EMPLOYMENT FOR"
+                        },
+                        {
+                              "text": "BELGIUM"
+                        },
+                        {
+                              "text": "the HR intranet."
+                        },
+                        {
+                              "text": "Deze is beschikbaar op het HR intranet."
+                        }
+                  ]
+            },
+            {
+                  "pageNumber": 2,
+                  "lines": [
+                        {
+                              "text": "ORACLE"
+                        },
+                        {
+                              "text": "Benefits"
+                        }
+                  ]
+            }
+      ],
+      "textExtractionModelVersion": "1.13.39"
+}
