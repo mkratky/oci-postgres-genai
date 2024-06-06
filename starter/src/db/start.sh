@@ -15,5 +15,5 @@ export FN_INVOKE_ENDPOINT="##FN_INVOKE_ENDPOINT##"
 export TF_VAR_compartment_ocid=`curl -s -H "Authorization: Bearer Oracle" -L http://169.254.169.254/opc/v2/instance/ | jq -r .compartmentId`
 
 python3.9 search_ingestion.py 2>&1 | tee search_ingestion.log
-
+# python3.9 search_query.py text jazz
 
