@@ -82,6 +82,7 @@ SELECT *, cohere_embed <=> '[0.1, 0.2, 0.3]' AS distance
 FROM oic
 ORDER BY distance
 LIMIT 10;
+
 6. Normalization and Combination for Hybrid Search
 For hybrid search combining text and vector similarities, you might need a more complex query combining the two scores.
 sql
