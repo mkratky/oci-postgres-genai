@@ -2,15 +2,8 @@
 import oci
 import os
 import json 
-import time
-import pathlib
 import requests
-import pprint
 import psycopg2
-
-from psycopg2.extras import execute_values
-from datetime import datetime
-from base64 import b64decode
 
 # Constant
 LOG_DIR = '/tmp/app_log'
@@ -49,10 +42,9 @@ def dictValue(d,key):
 ## -- embedText ------------------------------------------------------
 
 #XXXXX Ideally all vector should be created in one call
-def embedText(c):
+def embedText(c,signer):
     log( "<embedText>")
-    global signer
-    compartmentId = os.getEnv("TF_VAR_compartment_ocid")
+    compartmentId = os.getenv("TF_VAR_compartment_ocid")
     endpoint = 'https://inference.generativeai.us-chicago-1.oci.oraclecloud.com/20231130/actions/embedText'
     body = {
         "inputs" : [ c ],
@@ -149,13 +141,13 @@ def deleteDb(path):
 # -- queryDb ----------------------------------------------------------------------
 
 def queryDb( type, question, embed ):
-    query = "SELECT path, content, content_type FROM oic"
+    query = "SELECT filename, path, content, content_type FROM oic"
     if type=="text":
         # Text search example
-        query += " WHERE content ILIKE '%"+question+"%'"
+        query += " WHERE content ILIKE '%{0}%'".format(question)
     elif type=="vector":
-        query += " ORDER BY cohere_embed <=> '"+embed+"'+ LIMIT 10;"
-    elif type=="hybrid":
+        query += " ORDER BY cohere_embed <=> '{0}' LIMIT 10;".format(embed)
+    elif type in ["hybrid","rag"] :
         query = """
         WITH text_search AS (
             SELECT id, ts_rank_cd(to_tsvector(content), plainto_tsquery('{0}')) AS text_rank
@@ -166,7 +158,7 @@ def queryDb( type, question, embed ):
             SELECT id, cohere_embed <=> '{1}' AS vector_distance
             FROM oic
         )
-        SELECT o.id, o.content, 
+        SELECT o.filename, o.path, o.content, o.content_type
             (0.3 * ts.text_rank + 0.7 * (1 - vs.vector_distance)) AS hybrid_score
         FROM oic o
         JOIN text_search ts ON o.id = ts.id
@@ -176,11 +168,14 @@ def queryDb( type, question, embed ):
         """.format(question,embed)
     else:
         log( "Not supported type " + type)
+        return []
     result = [] 
     cursor = dbConn.cursor()
     cursor.execute(query)
     deptRows = cursor.fetchall()
     for row in deptRows:
-        result.append( {"path": row[0], "content": row[1], "contentType": row[2]} )  
-    log( result )
-
+        result.append( {"filename": row[0], "path": row[1], "content": row[2], "contentType": row[3]} )  
+    for r in result:
+        log("filename="+r["filename"])
+        log("content: "+r["content"][:150])
+    return result
