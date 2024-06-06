@@ -209,7 +209,7 @@ def insertDocument(value):
         chuncks = cutInChunks( p )
         for c in chuncks:
             result["cohereEmbed"] = embedText(c)
-            insertDb(result)
+            insertDb(c)
                 
 ## -- deleteDocument --------------------------------------------------------
 
