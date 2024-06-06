@@ -1,6 +1,5 @@
 # Install PostgreSQL 16
 # To run with root
-
 dnf module list postgresql
 dnf module switch-to postgresql:16 -y
 dnf install postgresql postgresql-server -y
@@ -21,7 +20,7 @@ EOF
 if [ ! -f /var/lib/pgsql/data/pg_hba.conf.orig ]; then
   cp /var/lib/pgsql/data/pg_hba.conf /var/lib/pgsql/data/pg_hba.conf.orig
 fi
-sed -i "sg/ident/password/g" /var/lib/pgsql/data/pg_hba.conf
+sed -i "s/ident/password/g" /var/lib/pgsql/data/pg_hba.conf
 
 firewall-cmd --zone=public --add-port=5432/tcp --permanent
 firewall-cmd --reload
