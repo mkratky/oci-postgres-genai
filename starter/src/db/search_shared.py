@@ -79,7 +79,7 @@ def closeDbConn():
 
 # -- insertDb -----------------------------------------------------------------
 
-def insertDb(result):  
+def insertDb(result,c):  
     global dbConn
     cur = dbConn.cursor()
     stmt = """
@@ -95,7 +95,7 @@ def insertDb(result):
             dictValue(result,"author"),
             dictValue(result,"translation"),
             dictValue(result,"cohereEmbed"),
-            dictValue(result,"content"),
+            c,
             dictValue(result,"contentType"),
             dictValue(result,"creationDate"),
             dictValue(result,"date"),
@@ -158,7 +158,7 @@ def queryDb( type, question, embed ):
             SELECT id, cohere_embed <=> '{1}' AS vector_distance
             FROM oic
         )
-        SELECT o.id, o.filename, o.path, o.content, o.content_type,
+        SELECT o.filename, o.path, o.content, o.content_type,
             (0.3 * ts.text_rank + 0.7 * (1 - vs.vector_distance)) AS hybrid_score
         FROM oic o
         JOIN text_search ts ON o.id = ts.id

@@ -5,8 +5,8 @@ import json
 import time
 import pathlib
 import requests
-import pprint
 import psycopg2
+import traceback
 
 from psycopg2.extras import execute_values
 from datetime import datetime
@@ -128,8 +128,7 @@ def stream_loop(client, stream_id, initial_cursor):
                 eventDocument(value)
             except:
                 log("Exception: stream_loop") 
-                log("key=" + str(message.key))
-                log("value=" + str(message.value))
+                print(traceback.format_exc())
             
         # get_messages is a throttled method; clients should retrieve sufficiently large message
         # batches, as to avoid too many http requests.
@@ -209,7 +208,7 @@ def insertDocument(value):
         chuncks = cutInChunks( p )
         for c in chuncks:
             result["cohereEmbed"] = embedText(c)
-            insertDb(c)
+            insertDb(result,c)
                 
 ## -- deleteDocument --------------------------------------------------------
 
@@ -588,7 +587,7 @@ def closeDbConn():
 
 # -- insertDb -----------------------------------------------------------------
 
-def insertDb(result):  
+def insertDb(result,c):  
     global dbConn
     cur = dbConn.cursor()
     stmt = """
@@ -604,7 +603,7 @@ def insertDb(result):
             dictValue(result,"author"),
             dictValue(result,"translation"),
             dictValue(result,"cohereEmbed"),
-            dictValue(result,"content"),
+            c,
             dictValue(result,"contentType"),
             dictValue(result,"creationDate"),
             dictValue(result,"date"),
@@ -666,9 +665,9 @@ stream_client = oci.streaming.StreamClient(config = {}, service_endpoint=ociMess
 # Committed offsets are managed for the group, and partitions
 # are dynamically balanced amongst consumers in the group.
 
-while True:
-    initDbConn()
-    group_cursor = stream_cursor(stream_client, ociStreamOcid, "app-group", "app-instance-1")
-    stream_loop(stream_client, ociStreamOcid, group_cursor)
-    closeDbConn()
-    time.sleep(30)
+# while True:
+initDbConn()
+group_cursor = stream_cursor(stream_client, ociStreamOcid, "app-group", "app-instance-1")
+stream_loop(stream_client, ociStreamOcid, group_cursor)
+closeDbConn()
+#     time.sleep(30)
