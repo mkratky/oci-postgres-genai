@@ -259,7 +259,7 @@ def decodeJson(value):
             concat_text += page + " "    
         original_resourcename = resourceName[:resourceName.index(".json")][resourceName.index("/results/"):]
         result = {
-            "resourceName": original_resourcename,
+            "filename": original_resourcename,
             "date": UNIQUE_ID,
             "applicationName": "OCI Document Understanding",
             "modified": UNIQUE_ID,
@@ -273,7 +273,7 @@ def decodeJson(value):
         # Speech
         original_resourcename = "/n/" + namespace + "/b/" + bucketName + "/o/" + resourceName[:resourceName.index(".json")][resourceName.index("_"):]
         result = {
-            "resourceName": original_resourcename,
+            "filename": original_resourcename,
             "date": UNIQUE_ID,
             "applicationName": "OCI Speech",
             "modified": UNIQUE_ID,
@@ -306,7 +306,7 @@ def invokeTika(value):
     log_in_file("tika_resp", resp.data.text) 
     j = json.loads(resp.data.text)
     result = {
-        "resourceName": resourceId,
+        "filename": resourceName,
         "date": UNIQUE_ID,
         "applicationName": "Tika Parser",
         "modified": UNIQUE_ID,
@@ -420,7 +420,7 @@ def vision(value):
     log("concat_labels: " +concat_labels )
 
     result = {
-        "resourceName": resourceName,
+        "filename": resourceName,
         "date": UNIQUE_ID,
         "modified": UNIQUE_ID,
         "contentType": "Image",
@@ -472,7 +472,7 @@ def belgian(value):
     birthdate = resp.data.image_text.lines[22]
 
     result = {
-        "resourceName": resourceName,
+        "filename": resourceName,
         "date": UNIQUE_ID,
         "modified": UNIQUE_ID,
         "contentType": "Belgian ID",
@@ -639,7 +639,7 @@ def deleteDb(path):
     stmt = "delete from oic where path=%s"
     try:
         cur.execute(stmt, (path,))
-        print(f"<deleteDb> Successfully deleted")
+        print(f"<deleteDb> Successfully {cur.rowcount} records deleted")
     except (Exception, psycopg2.Error) as error:
         print(f"<deleteDb> Error deleting: {error}")
     finally:
