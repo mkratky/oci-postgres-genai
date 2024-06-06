@@ -100,3 +100,734 @@ Output
             }
       }
 }
+
+Output JSON in Object ObjectStorage
+{
+    "status": "SUCCESS",
+    "timeCreated": "2024-06-04 20:12:01.347",
+    "modelDetails": {
+        "domain": "GENERIC",
+        "languageCode": "en-US"
+    },
+    "audioFormatDetails": {
+        "format": "MP4",
+        "numberOfChannels": 2,
+        "encoding": "MPEG",
+        "sampleRateInHz": 44100
+    },
+    "transcriptions": [
+        {
+            "transcription": "Every year, you know, we try to to grow we, go to different places or meeting different fans all around the world is is very unique and special formula. One is the top about his works but, this is about winning we. Want to win for my sites I. Know that I'm going to give everything I have you. Know the competition is fierce so, tremendously exciting continue. To build the fastest possible car, continue, to win races. I continue to bill found them in the US.",
+            "confidence": "0.9212",
+            "tokens": [
+                {
+                    "token": "Every",
+                    "startTime": "5.952s",
+                    "endTime": "6.432s",
+                    "confidence": "0.6879",
+                    "type": "WORD"
+                },
+                {
+                    "token": "year",
+                    "startTime": "6.432s",
+                    "endTime": "6.720s",
+                    "confidence": "0.9818",
+                    "type": "WORD"
+                },
+                {
+                    "token": ",",
+                    "startTime": "6.720s",
+                    "endTime": "6.720s",
+                    "confidence": "0.5875",
+                    "type": "PUNCTUATION"
+                },
+                {
+                    "token": "you",
+                    "startTime": "6.720s",
+                    "endTime": "6.912s",
+                    "confidence": "0.8981",
+                    "type": "WORD"
+                },
+                {
+                    "token": "know",
+                    "startTime": "6.912s",
+                    "endTime": "7.152s",
+                    "confidence": "0.9480",
+                    "type": "WORD"
+                },
+                {
+                    "token": ",",
+                    "startTime": "7.152s",
+                    "endTime": "7.152s",
+                    "confidence": "0.6356",
+                    "type": "PUNCTUATION"
+                },
+                {
+                    "token": "we",
+                    "startTime": "7.152s",
+                    "endTime": "7.296s",
+                    "confidence": "0.8895",
+                    "type": "WORD"
+                },
+                {
+                    "token": "try",
+                    "startTime": "7.296s",
+                    "endTime": "7.488s",
+                    "confidence": "0.9459",
+                    "type": "WORD"
+                },
+                {
+                    "token": "to",
+                    "startTime": "7.488s",
+                    "endTime": "7.872s",
+                    "confidence": "0.9671",
+                    "type": "WORD"
+                },
+                {
+                    "token": "to",
+                    "startTime": "7.872s",
+                    "endTime": "8.064s",
+                    "confidence": "0.8751",
+                    "type": "WORD"
+                },
+                {
+                    "token": "grow",
+                    "startTime": "8.064s",
+                    "endTime": "8.496s",
+                    "confidence": "0.9440",
+                    "type": "WORD"
+                },
+                {
+                    "token": "we",
+                    "startTime": "8.688s",
+                    "endTime": "8.928s",
+                    "confidence": "0.9545",
+                    "type": "WORD"
+                },
+                {
+                    "token": ",",
+                    "startTime": "8.928s",
+                    "endTime": "8.928s",
+                    "confidence": "0.3547",
+                    "type": "PUNCTUATION"
+                },
+                {
+                    "token": "go",
+                    "startTime": "8.928s",
+                    "endTime": "9.072s",
+                    "confidence": "0.9718",
+                    "type": "WORD"
+                },
+                {
+                    "token": "to",
+                    "startTime": "9.072s",
+                    "endTime": "9.216s",
+                    "confidence": "0.7458",
+                    "type": "WORD"
+                },
+                {
+                    "token": "different",
+                    "startTime": "9.216s",
+                    "endTime": "9.600s",
+                    "confidence": "0.9447",
+                    "type": "WORD"
+                },
+                {
+                    "token": "places",
+                    "startTime": "9.600s",
+                    "endTime": "10.128s",
+                    "confidence": "0.9915",
+                    "type": "WORD"
+                },
+                {
+                    "token": "or",
+                    "startTime": "10.128s",
+                    "endTime": "10.464s",
+                    "confidence": "0.8098",
+                    "type": "WORD"
+                },
+                {
+                    "token": "meeting",
+                    "startTime": "10.512s",
+                    "endTime": "10.896s",
+                    "confidence": "0.8938",
+                    "type": "WORD"
+                },
+                {
+                    "token": "different",
+                    "startTime": "10.896s",
+                    "endTime": "11.280s",
+                    "confidence": "0.9552",
+                    "type": "WORD"
+                },
+                {
+                    "token": "fans",
+                    "startTime": "11.280s",
+                    "endTime": "11.760s",
+                    "confidence": "0.9089",
+                    "type": "WORD"
+                },
+                {
+                    "token": "all",
+                    "startTime": "12.048s",
+                    "endTime": "12.336s",
+                    "confidence": "0.9595",
+                    "type": "WORD"
+                },
+                {
+                    "token": "around",
+                    "startTime": "12.336s",
+                    "endTime": "12.576s",
+                    "confidence": "0.9534",
+                    "type": "WORD"
+                },
+                {
+                    "token": "the",
+                    "startTime": "12.576s",
+                    "endTime": "12.672s",
+                    "confidence": "0.9756",
+                    "type": "WORD"
+                },
+                {
+                    "token": "world",
+                    "startTime": "12.672s",
+                    "endTime": "12.960s",
+                    "confidence": "0.9477",
+                    "type": "WORD"
+                },
+                {
+                    "token": "is",
+                    "startTime": "12.960s",
+                    "endTime": "13.248s",
+                    "confidence": "0.9312",
+                    "type": "WORD"
+                },
+                {
+                    "token": "is",
+                    "startTime": "13.488s",
+                    "endTime": "13.680s",
+                    "confidence": "0.9829",
+                    "type": "WORD"
+                },
+                {
+                    "token": "very",
+                    "startTime": "13.680s",
+                    "endTime": "13.920s",
+                    "confidence": "0.9225",
+                    "type": "WORD"
+                },
+                {
+                    "token": "unique",
+                    "startTime": "13.920s",
+                    "endTime": "14.256s",
+                    "confidence": "0.9732",
+                    "type": "WORD"
+                },
+                {
+                    "token": "and",
+                    "startTime": "14.256s",
+                    "endTime": "14.448s",
+                    "confidence": "0.8098",
+                    "type": "WORD"
+                },
+                {
+                    "token": "special",
+                    "startTime": "14.448s",
+                    "endTime": "14.832s",
+                    "confidence": "0.9842",
+                    "type": "WORD"
+                },
+                {
+                    "token": "formula",
+                    "startTime": "18.816s",
+                    "endTime": "19.296s",
+                    "confidence": "0.9218",
+                    "type": "WORD"
+                },
+                {
+                    "token": ".",
+                    "startTime": "19.296s",
+                    "endTime": "19.296s",
+                    "confidence": "0.5244",
+                    "type": "PUNCTUATION"
+                },
+                {
+                    "token": "One",
+                    "startTime": "19.296s",
+                    "endTime": "19.488s",
+                    "confidence": "0.9955",
+                    "type": "WORD"
+                },
+                {
+                    "token": "is",
+                    "startTime": "19.488s",
+                    "endTime": "19.680s",
+                    "confidence": "0.9883",
+                    "type": "WORD"
+                },
+                {
+                    "token": "the",
+                    "startTime": "19.680s",
+                    "endTime": "19.776s",
+                    "confidence": "0.9728",
+                    "type": "WORD"
+                },
+                {
+                    "token": "top",
+                    "startTime": "19.776s",
+                    "endTime": "20.256s",
+                    "confidence": "0.9796",
+                    "type": "WORD"
+                },
+                {
+                    "token": "about",
+                    "startTime": "20.256s",
+                    "endTime": "20.544s",
+                    "confidence": "0.6334",
+                    "type": "WORD"
+                },
+                {
+                    "token": "his",
+                    "startTime": "20.544s",
+                    "endTime": "20.688s",
+                    "confidence": "0.6333",
+                    "type": "WORD"
+                },
+                {
+                    "token": "works",
+                    "startTime": "20.688s",
+                    "endTime": "20.976s",
+                    "confidence": "0.8187",
+                    "type": "WORD"
+                },
+                {
+                    "token": "but",
+                    "startTime": "20.976s",
+                    "endTime": "21.120s",
+                    "confidence": "0.9531",
+                    "type": "WORD"
+                },
+                {
+                    "token": ",",
+                    "startTime": "21.120s",
+                    "endTime": "21.120s",
+                    "confidence": "0.5591",
+                    "type": "PUNCTUATION"
+                },
+                {
+                    "token": "this",
+                    "startTime": "21.120s",
+                    "endTime": "21.264s",
+                    "confidence": "0.8784",
+                    "type": "WORD"
+                },
+                {
+                    "token": "is",
+                    "startTime": "21.264s",
+                    "endTime": "21.360s",
+                    "confidence": "0.9350",
+                    "type": "WORD"
+                },
+                {
+                    "token": "about",
+                    "startTime": "21.360s",
+                    "endTime": "21.600s",
+                    "confidence": "0.9886",
+                    "type": "WORD"
+                },
+                {
+                    "token": "winning",
+                    "startTime": "21.600s",
+                    "endTime": "21.888s",
+                    "confidence": "0.9922",
+                    "type": "WORD"
+                },
+                {
+                    "token": "we",
+                    "startTime": "22.128s",
+                    "endTime": "22.320s",
+                    "confidence": "0.9922",
+                    "type": "WORD"
+                },
+                {
+                    "token": ".",
+                    "startTime": "22.320s",
+                    "endTime": "22.320s",
+                    "confidence": "0.6876",
+                    "type": "PUNCTUATION"
+                },
+                {
+                    "token": "Want",
+                    "startTime": "22.320s",
+                    "endTime": "22.560s",
+                    "confidence": "0.9674",
+                    "type": "WORD"
+                },
+                {
+                    "token": "to",
+                    "startTime": "22.560s",
+                    "endTime": "22.656s",
+                    "confidence": "0.8852",
+                    "type": "WORD"
+                },
+                {
+                    "token": "win",
+                    "startTime": "22.656s",
+                    "endTime": "22.896s",
+                    "confidence": "0.9926",
+                    "type": "WORD"
+                },
+                {
+                    "token": "for",
+                    "startTime": "30.144s",
+                    "endTime": "30.336s",
+                    "confidence": "0.9053",
+                    "type": "WORD"
+                },
+                {
+                    "token": "my",
+                    "startTime": "30.336s",
+                    "endTime": "30.528s",
+                    "confidence": "0.9631",
+                    "type": "WORD"
+                },
+                {
+                    "token": "sites",
+                    "startTime": "30.528s",
+                    "endTime": "31.008s",
+                    "confidence": "0.9746",
+                    "type": "WORD"
+                },
+                {
+                    "token": "I",
+                    "startTime": "31.056s",
+                    "endTime": "31.200s",
+                    "confidence": "0.9815",
+                    "type": "WORD"
+                },
+                {
+                    "token": ".",
+                    "startTime": "31.200s",
+                    "endTime": "31.200s",
+                    "confidence": "0.5811",
+                    "type": "PUNCTUATION"
+                },
+                {
+                    "token": "Know",
+                    "startTime": "31.200s",
+                    "endTime": "31.344s",
+                    "confidence": "0.9337",
+                    "type": "WORD"
+                },
+                {
+                    "token": "that",
+                    "startTime": "31.344s",
+                    "endTime": "31.488s",
+                    "confidence": "0.9549",
+                    "type": "WORD"
+                },
+                {
+                    "token": "I'm",
+                    "startTime": "31.488s",
+                    "endTime": "31.632s",
+                    "confidence": "0.9419",
+                    "type": "WORD"
+                },
+                {
+                    "token": "going",
+                    "startTime": "31.632s",
+                    "endTime": "31.824s",
+                    "confidence": "0.8888",
+                    "type": "WORD"
+                },
+                {
+                    "token": "to",
+                    "startTime": "31.824s",
+                    "endTime": "31.920s",
+                    "confidence": "0.9398",
+                    "type": "WORD"
+                },
+                {
+                    "token": "give",
+                    "startTime": "31.920s",
+                    "endTime": "32.064s",
+                    "confidence": "0.9818",
+                    "type": "WORD"
+                },
+                {
+                    "token": "everything",
+                    "startTime": "32.064s",
+                    "endTime": "32.400s",
+                    "confidence": "0.9207",
+                    "type": "WORD"
+                },
+                {
+                    "token": "I",
+                    "startTime": "32.400s",
+                    "endTime": "32.496s",
+                    "confidence": "0.9265",
+                    "type": "WORD"
+                },
+                {
+                    "token": "have",
+                    "startTime": "32.496s",
+                    "endTime": "32.784s",
+                    "confidence": "0.9477",
+                    "type": "WORD"
+                },
+                {
+                    "token": "you",
+                    "startTime": "33.744s",
+                    "endTime": "33.888s",
+                    "confidence": "0.9562",
+                    "type": "WORD"
+                },
+                {
+                    "token": ".",
+                    "startTime": "33.888s",
+                    "endTime": "33.888s",
+                    "confidence": "0.5197",
+                    "type": "PUNCTUATION"
+                },
+                {
+                    "token": "Know",
+                    "startTime": "33.888s",
+                    "endTime": "33.984s",
+                    "confidence": "0.9793",
+                    "type": "WORD"
+                },
+                {
+                    "token": "the",
+                    "startTime": "33.984s",
+                    "endTime": "34.080s",
+                    "confidence": "0.9623",
+                    "type": "WORD"
+                },
+                {
+                    "token": "competition",
+                    "startTime": "34.080s",
+                    "endTime": "34.704s",
+                    "confidence": "0.9865",
+                    "type": "WORD"
+                },
+                {
+                    "token": "is",
+                    "startTime": "34.704s",
+                    "endTime": "34.896s",
+                    "confidence": "0.9746",
+                    "type": "WORD"
+                },
+                {
+                    "token": "fierce",
+                    "startTime": "34.896s",
+                    "endTime": "35.280s",
+                    "confidence": "0.9681",
+                    "type": "WORD"
+                },
+                {
+                    "token": "so",
+                    "startTime": "35.280s",
+                    "endTime": "35.376s",
+                    "confidence": "0.6819",
+                    "type": "WORD"
+                },
+                {
+                    "token": ",",
+                    "startTime": "35.376s",
+                    "endTime": "35.376s",
+                    "confidence": "0.5367",
+                    "type": "PUNCTUATION"
+                },
+                {
+                    "token": "tremendously",
+                    "startTime": "35.376s",
+                    "endTime": "35.904s",
+                    "confidence": "0.2451",
+                    "type": "WORD"
+                },
+                {
+                    "token": "exciting",
+                    "startTime": "35.904s",
+                    "endTime": "36.288s",
+                    "confidence": "0.9272",
+                    "type": "WORD"
+                },
+                {
+                    "token": "continue",
+                    "startTime": "36.768s",
+                    "endTime": "37.344s",
+                    "confidence": "0.9764",
+                    "type": "WORD"
+                },
+                {
+                    "token": ".",
+                    "startTime": "37.344s",
+                    "endTime": "37.344s",
+                    "confidence": "0.4481",
+                    "type": "PUNCTUATION"
+                },
+                {
+                    "token": "To",
+                    "startTime": "37.344s",
+                    "endTime": "37.440s",
+                    "confidence": "0.9969",
+                    "type": "WORD"
+                },
+                {
+                    "token": "build",
+                    "startTime": "37.440s",
+                    "endTime": "37.632s",
+                    "confidence": "0.9976",
+                    "type": "WORD"
+                },
+                {
+                    "token": "the",
+                    "startTime": "37.632s",
+                    "endTime": "37.728s",
+                    "confidence": "0.9523",
+                    "type": "WORD"
+                },
+                {
+                    "token": "fastest",
+                    "startTime": "37.728s",
+                    "endTime": "38.112s",
+                    "confidence": "0.9373",
+                    "type": "WORD"
+                },
+                {
+                    "token": "possible",
+                    "startTime": "38.112s",
+                    "endTime": "38.496s",
+                    "confidence": "0.9850",
+                    "type": "WORD"
+                },
+                {
+                    "token": "car",
+                    "startTime": "38.496s",
+                    "endTime": "38.928s",
+                    "confidence": "0.9756",
+                    "type": "WORD"
+                },
+                {
+                    "token": ",",
+                    "startTime": "38.928s",
+                    "endTime": "38.928s",
+                    "confidence": "0.5971",
+                    "type": "PUNCTUATION"
+                },
+                {
+                    "token": "continue",
+                    "startTime": "39.168s",
+                    "endTime": "39.648s",
+                    "confidence": "0.9520",
+                    "type": "WORD"
+                },
+                {
+                    "token": ",",
+                    "startTime": "39.648s",
+                    "endTime": "39.648s",
+                    "confidence": "0.6212",
+                    "type": "PUNCTUATION"
+                },
+                {
+                    "token": "to",
+                    "startTime": "39.648s",
+                    "endTime": "39.792s",
+                    "confidence": "0.9840",
+                    "type": "WORD"
+                },
+                {
+                    "token": "win",
+                    "startTime": "39.792s",
+                    "endTime": "39.936s",
+                    "confidence": "0.9890",
+                    "type": "WORD"
+                },
+                {
+                    "token": "races",
+                    "startTime": "39.936s",
+                    "endTime": "40.608s",
+                    "confidence": "0.9445",
+                    "type": "WORD"
+                },
+                {
+                    "token": ".",
+                    "startTime": "40.608s",
+                    "endTime": "40.608s",
+                    "confidence": "0.4797",
+                    "type": "PUNCTUATION"
+                },
+                {
+                    "token": "I",
+                    "startTime": "40.752s",
+                    "endTime": "40.896s",
+                    "confidence": "0.9961",
+                    "type": "WORD"
+                },
+                {
+                    "token": "continue",
+                    "startTime": "40.896s",
+                    "endTime": "41.328s",
+                    "confidence": "0.9361",
+                    "type": "WORD"
+                },
+                {
+                    "token": "to",
+                    "startTime": "41.328s",
+                    "endTime": "41.424s",
+                    "confidence": "0.9753",
+                    "type": "WORD"
+                },
+                {
+                    "token": "bill",
+                    "startTime": "41.424s",
+                    "endTime": "41.568s",
+                    "confidence": "0.8816",
+                    "type": "WORD"
+                },
+                {
+                    "token": "found",
+                    "startTime": "41.568s",
+                    "endTime": "41.760s",
+                    "confidence": "0.6050",
+                    "type": "WORD"
+                },
+                {
+                    "token": "them",
+                    "startTime": "41.760s",
+                    "endTime": "41.904s",
+                    "confidence": "0.9437",
+                    "type": "WORD"
+                },
+                {
+                    "token": "in",
+                    "startTime": "41.904s",
+                    "endTime": "42.000s",
+                    "confidence": "0.9433",
+                    "type": "WORD"
+                },
+                {
+                    "token": "the",
+                    "startTime": "42.000s",
+                    "endTime": "42.096s",
+                    "confidence": "0.9944",
+                    "type": "WORD"
+                },
+                {
+                    "token": "US",
+                    "startTime": "42.096s",
+                    "endTime": "42.528s",
+                    "confidence": "0.9509",
+                    "type": "WORD"
+                },
+                {
+                    "token": ".",
+                    "startTime": "42.528s",
+                    "endTime": "42.528s",
+                    "confidence": "0.6293",
+                    "type": "PUNCTUATION"
+                }
+            ]
+        }
+    ]
+}

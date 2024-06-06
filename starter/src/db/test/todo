@@ -1,0 +1,107 @@
+To swap OpenSearch with PostgreSQL using the pgvector plugin, you will need to perform a series of steps to migrate the data and adapt the processes described in the PDF for PostgreSQL. Below are the detailed steps for achieving this:
+1. Set Up PostgreSQL with pgvector
+Install pgvector Extension:
+Connect to your PostgreSQL database and install the pgvector extension.
+CREATE EXTENSION IF NOT EXISTS vector;
+2. Create a Table in PostgreSQL
+Create a table that mirrors the structure of the OpenSearch index.
+sql
+
+CREATE TABLE oic (
+    id SERIAL PRIMARY KEY,
+    application_name TEXT,
+    author TEXT,
+    translation TEXT,
+    cohere_embed VECTOR(1024),
+    content TEXT,
+    content_type VARCHAR(255),
+    creation_date TIMESTAMP,
+    date TIMESTAMP,
+    modified TIMESTAMP,
+    other1 TEXT,
+    other2 TEXT,
+    other3 TEXT,
+    parsed_by TEXT,
+    filename VARCHAR(255),
+    path VARCHAR(255),
+    publisher TEXT,
+    region VARCHAR(255),
+    context TEXT
+);
+3. Create Indexes for Efficient Searching
+Create indexes to optimize searching, especially for the vector field.
+sql
+
+CREATE INDEX ON oic USING ivfflat (cohere_embed) WITH (lists = 100);
+CREATE INDEX ON oic (filename);
+CREATE INDEX ON oic (path);
+4. Adapt Document Ingestion Pipeline
+Update your document ingestion pipeline to insert data into PostgreSQL instead of OpenSearch.
+python
+
+import psycopg2
+from psycopg2.extras import execute_values
+
+# Establish connection
+conn = psycopg2.connect("dbname=yourdb user=youruser password=yourpass host=yourhost")
+cur = conn.cursor()
+
+# Function to insert document chunks
+def insert_document_chunks(documents):
+    query = """
+    INSERT INTO oic (application_name, author, translation, cohere_embed, content, content_type, 
+                     creation_date, date, modified, other1, other2, other3, parsed_by, 
+                     filename, path, publisher, region, context)
+    VALUES %s
+    """
+    execute_values(cur, query, documents)
+    conn.commit()
+
+# Example document data
+documents = [
+    ("app1", "author1", "translation1", [0.1, 0.2, 0.3], "content1", "text", "2024-06-05T12:31:21.393Z",
+     "2024-06-05T12:31:21.393Z", "2024-06-05T12:31:21.393Z", "other1", "other2", "other3", "parsed_by",
+     "filename1", "path1", "publisher1", "region1", "context1")
+]
+
+# Insert document chunks
+insert_document_chunks(documents)
+
+# Close connection
+cur.close()
+conn.close()
+5. Search Pipeline Adaptation
+For searching with PostgreSQL, use SQL queries to perform text and vector searches.
+sql
+
+-- Text search example
+SELECT * FROM oic WHERE content ILIKE '%search_term%';
+
+-- Vector search example
+SELECT *, cohere_embed <=> '[0.1, 0.2, 0.3]' AS distance
+FROM oic
+ORDER BY distance
+LIMIT 10;
+6. Normalization and Combination for Hybrid Search
+For hybrid search combining text and vector similarities, you might need a more complex query combining the two scores.
+sql
+
+WITH text_search AS (
+    SELECT id, ts_rank_cd(to_tsvector(content), plainto_tsquery('search_term')) AS text_rank
+    FROM oic
+    WHERE content @@ plainto_tsquery('search_term')
+),
+vector_search AS (
+    SELECT id, cohere_embed <=> '[0.1, 0.2, 0.3]' AS vector_distance
+    FROM oic
+)
+SELECT o.id, o.content, 
+       (0.3 * ts.text_rank + 0.7 * (1 - vs.vector_distance)) AS hybrid_score
+FROM oic o
+JOIN text_search ts ON o.id = ts.id
+JOIN vector_search vs ON o.id = vs.id
+ORDER BY hybrid_score DESC
+LIMIT 10;
+Conclusion
+By following these steps, you should be able to migrate your OpenSearch solution to PostgreSQL with the pgvector plugin, adapting your data structures, ingestion pipeline, and search functionality accordingly.
+While PostgreSQL does not provide a built-in REST API like OpenSearch, you can easily create one using tools like PostgREST, Hasura, or by building a custom solution with Node.js and Express. Each method has its own advantages and flexibility, depending on your requirements.

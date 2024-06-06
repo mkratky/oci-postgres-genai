@@ -6,13 +6,18 @@ import time
 import pathlib
 import requests
 import pprint
+import psycopg2
 
+from psycopg2.extras import execute_values
 from datetime import datetime
 from base64 import b64decode
 
 # Constant
 LOG_DIR = '/tmp/app_log'
 UNIQUE_ID = "ID"
+
+# Connection
+dbConn = None
 
 ## -- log ------------------------------------------------------------------
 
@@ -62,12 +67,16 @@ def cutInChunks(text):
                chunck_end = last_medium_separator
             elif last_bad_separator > 0:
                chunck_end = last_bad_separator
-            chunck = text[chunck_start:chunck_end+1]
+            chunck = text[chunck_start:chunck_end]
             log("chunck_start= " + str(chunck_start) + " - " + chunck)   
             result.append( chunck )
-            chunck_start=chunck_end +1 
+            chunck_start=chunck_end 
+            last_good_separator = 0
+            last_medium_separator = 0
+            last_bad_separator = 0
     # Last chunck
     chunck = text[chunck_start:]
+    log("chunck_start= " + str(chunck_start) + " - " + chunck)  
     result.append( chunck )
     return result
 
@@ -96,6 +105,7 @@ def log_in_file(prefix, value):
 def stream_loop(client, stream_id, initial_cursor):
     global UNIQUE_ID 
     cursor = initial_cursor
+    initDbConn()
     while True:
         get_response = client.get_messages(stream_id, cursor, limit=10)
         # No messages to process. return.
@@ -112,7 +122,7 @@ def stream_loop(client, stream_id, initial_cursor):
                 else:
                     key = b64decode(message.key.encode()).decode()
                 json_value = b64decode(message.value.encode()).decode(); 
-                log("{}: {}".format(key,json_value))
+                log(json_value)
                 UNIQUE_ID = datetime.now().strftime("%Y%m%d-%H%M%S.%f")
                 log_in_file("stream", json_value)
                 value = json.loads(json_value)
@@ -128,6 +138,8 @@ def stream_loop(client, stream_id, initial_cursor):
         # use the next-cursor for iteration
         cursor = get_response.headers["opc-next-cursor"]
 
+
+
 ## -- eventDocument --------------------------------------------------------
 
 def eventDocument(value):
@@ -136,7 +148,7 @@ def eventDocument(value):
     # ex: /n/fr03kzmuvhtf/b/psql-public-bucket/o/country.pdf"
     # XXX OIC: resourcePath
     resourceId = value["data"]["resourceId"]
-    log( eventType + " - " + resourceId ) 
+    log( "eventType=" + eventType + " - " + resourceId ) 
 
     if eventType in ["com.oraclecloud.objectstorage.createobject", "com.oraclecloud.objectstorage.updateobject"]:
         insertDocument( value )
@@ -176,8 +188,9 @@ def insertDocument(value):
     else:
         result = invokeTika(value)
 
-    var_content_1 = result["content"]
     log_in_file("content", result["content"])
+    if len(result["content"])==0:
+       return 
 
     # Summary 
     summary = "-"
@@ -196,9 +209,17 @@ def insertDocument(value):
         # Get Next Chunks
         chuncks = cutInChunks( p )
         for c in chuncks:
-            embedding = embedText(value, c)
-
+            result["cohereEmbed"] = embedText(c)
+            insertDb(result)
                 
+## -- deleteDocument --------------------------------------------------------
+
+def deleteDocument(value):
+    log( "<deleteDocument>")
+    resourceId = value["data"]["resourceId"]
+    deleteDb(resourceId)
+    log( "</deleteDocument>")
+
 
 ## -- decodeJson ------------------------------------------------------------------
 
@@ -300,11 +321,6 @@ def invokeTika(value):
     log( "</invokeTika>")
     return result
 
-## -- deleteDocument --------------------------------------------------------
-
-def deleteDocument(value):
-    print ('TODO')
-
 ## -- summarizeContent ------------------------------------------------------
 
 def summarizeContent(value,content):
@@ -336,10 +352,10 @@ def summarizeContent(value,content):
 ## -- embedText ------------------------------------------------------
 
 #XXXXX Ideally all vector should be created in one call
-def embedText(value, c):
+def embedText(c):
     log( "<embedText>")
     global signer
-    compartmentId = value["data"]["compartmentId"]
+    compartmentId = os.getEnv("TF_VAR_compartment_ocid")
     endpoint = 'https://inference.generativeai.us-chicago-1.oci.oraclecloud.com/20231130/actions/embedText'
     body = {
         "inputs" : [ c ],
@@ -558,6 +574,79 @@ def documentUnderstanding(value):
     log_in_file("documentUnderstanding_resp",str(resp.data))
     log( "</documentUnderstanding>")
 
+## -- initDbConn --------------------------------------------------------------
+
+def initDbConn():
+    global dbConn 
+    dbConn = psycopg2.connect(dbname="postgres", user=os.getenv('DB_USER'), password=os.getenv('DB_PASSWORD'), host=os.getenv('DB_URL'))
+    dbConn.autocommit = True
+
+## -- closeDbConn --------------------------------------------------------------
+
+def closeDbConn():
+    global dbConn 
+    dbConn.close()
+
+# -- insertDb -----------------------------------------------------------------
+
+def insertDb(result):  
+    global dbConn
+    cur = dbConn.cursor()
+    stmt = """
+        INSERT INTO oic (
+            application_name, author, translation, cohere_embed, content, content_type,
+            creation_date, date, modified, other1, other2, other3, parsed_by,
+            filename, path, publisher, region, context
+        )
+        VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+    """
+    data = [
+        (dictValue(result,"applicationName"), 
+            dictValue(result,"author"),
+            dictValue(result,"translation"),
+            dictValue(result,"cohereEmbed"),
+            dictValue(result,"content"),
+            dictValue(result,"contentType"),
+            dictValue(result,"creationDate"),
+            dictValue(result,"date"),
+            dictValue(result,"modified"),
+            dictValue(result,"other1"),
+            dictValue(result,"other2"),
+            dictValue(result,"other3"),
+            dictValue(result,"parsed_by"),
+            dictValue(result,"filename"),
+            dictValue(result,"path"),
+            dictValue(result,"publisher"),
+            dictValue(result,"region"),
+            dictValue(result,"context")
+        )
+    ]
+    try:
+        cur.executemany(stmt, data)
+        print(f"Successfully inserted {cur.rowcount} records.")
+    except (Exception, psycopg2.Error) as error:
+        print(f"Error inserting records: {error}")
+    finally:
+        # Close the cursor and connection
+        if cur:
+            cur.close()
+
+# -- deleteDb -----------------------------------------------------------------
+
+def deleteDb(path):  
+    global dbConn
+    cur = dbConn.cursor()
+    stmt = "delete from oic where path=%s"
+    try:
+        cur.execute(stmt, (path,))
+        print(f"<deleteDb> Successfully deleted")
+    except (Exception, psycopg2.Error) as error:
+        print(f"<deleteDb> Error deleting: {error}")
+    finally:
+        # Close the cursor and connection
+        if cur:
+            cur.close()
+
 ## -- main ------------------------------------------------------------------
 
 # Create Log directory
@@ -577,6 +666,7 @@ stream_client = oci.streaming.StreamClient(config = {}, service_endpoint=ociMess
 # A cursor can be created as part of a consumer group.
 # Committed offsets are managed for the group, and partitions
 # are dynamically balanced amongst consumers in the group.
+initDbConn()
 group_cursor = stream_cursor(stream_client, ociStreamOcid, "app-group", "app-instance-1")
 stream_loop(stream_client, ociStreamOcid, group_cursor)
-
+closeDbConn()
