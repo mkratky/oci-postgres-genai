@@ -31,6 +31,8 @@ sed -i "s/##FN_OCID##/$FN_OCID/" $CONFIG_FILE
 sed -i "s!##STREAM_MESSAGE_ENDPOINT##!$STREAM_MESSAGE_ENDPOINT!" $CONFIG_FILE
 sed -i "s!##FN_INVOKE_ENDPOINT##!$FN_INVOKE_ENDPOINT!" $CONFIG_FILE
 
+APP_DIR=db
+
 # Create an APP service
 cat > /tmp/$APP_DIR.service << EOT
 [Unit]

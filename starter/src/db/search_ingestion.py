@@ -129,8 +129,8 @@ def stream_loop(client, stream_id, initial_cursor):
                 eventDocument(value)
             except:
                 log("Exception: stream_loop") 
-                log("key=" + message.key)
-                log("value=" + message.value)
+                log("key=" + str(message.key))
+                log("value=" + str(message.value))
             
         # get_messages is a throttled method; clients should retrieve sufficiently large message
         # batches, as to avoid too many http requests.
