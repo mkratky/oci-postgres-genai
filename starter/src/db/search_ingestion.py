@@ -355,7 +355,7 @@ def summarizeContent(value,content):
 def embedText(c):
     log( "<embedText>")
     global signer
-    compartmentId = os.getEnv("TF_VAR_compartment_ocid")
+    compartmentId = os.getenv("TF_VAR_compartment_ocid")
     endpoint = 'https://inference.generativeai.us-chicago-1.oci.oraclecloud.com/20231130/actions/embedText'
     body = {
         "inputs" : [ c ],
