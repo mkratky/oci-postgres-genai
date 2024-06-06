@@ -105,7 +105,6 @@ def log_in_file(prefix, value):
 def stream_loop(client, stream_id, initial_cursor):
     global UNIQUE_ID 
     cursor = initial_cursor
-    initDbConn()
     while True:
         get_response = client.get_messages(stream_id, cursor, limit=10)
         # No messages to process. return.
@@ -666,7 +665,10 @@ stream_client = oci.streaming.StreamClient(config = {}, service_endpoint=ociMess
 # A cursor can be created as part of a consumer group.
 # Committed offsets are managed for the group, and partitions
 # are dynamically balanced amongst consumers in the group.
-initDbConn()
-group_cursor = stream_cursor(stream_client, ociStreamOcid, "app-group", "app-instance-1")
-stream_loop(stream_client, ociStreamOcid, group_cursor)
-closeDbConn()
+
+while True:
+    initDbConn()
+    group_cursor = stream_cursor(stream_client, ociStreamOcid, "app-group", "app-instance-1")
+    stream_loop(stream_client, ociStreamOcid, group_cursor)
+    closeDbConn()
+    time.sleep(30)
