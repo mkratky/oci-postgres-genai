@@ -665,9 +665,9 @@ stream_client = oci.streaming.StreamClient(config = {}, service_endpoint=ociMess
 # Committed offsets are managed for the group, and partitions
 # are dynamically balanced amongst consumers in the group.
 
-# while True:
-initDbConn()
-group_cursor = stream_cursor(stream_client, ociStreamOcid, "app-group", "app-instance-1")
-stream_loop(stream_client, ociStreamOcid, group_cursor)
-closeDbConn()
-#     time.sleep(30)
+while True:
+    initDbConn()
+    group_cursor = stream_cursor(stream_client, ociStreamOcid, "app-group", "app-instance-1")
+    stream_loop(stream_client, ociStreamOcid, group_cursor)
+    closeDbConn()
+    time.sleep(30)
