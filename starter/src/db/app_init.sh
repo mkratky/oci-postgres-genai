@@ -2,7 +2,7 @@
 sudo yum -y install postgresql-devel
 sudo dnf install -y python39 python39-devel
 sudo pip3.9 install pip --upgrade
-sudo pip3.9 install -r requirements.txt
+pip3.9 install -r requirements.txt
 
 # Store the db_connection in the start.sh
 

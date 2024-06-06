@@ -1,5 +1,3 @@
-
-variable oic_appid {}
 variable idcs_domain_name { default = "Default" }
 variable idcs_url { default = "" }
 
