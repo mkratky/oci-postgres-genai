@@ -35,29 +35,34 @@ create_service () {
     APP_DIR=$1
     COMMAND=$2
     # Create an db service
-    cat > /tmp/$APP_DIR.service << EOT
-    [Unit]
-    Description=$COMMAND
-    After=network.target
+    cat > /tmp/$COMMAND.service << EOT
+[Unit]
+Description=$COMMAND
+After=network.target
 
-    [Service]
-    Type=simple
-    ExecStart=/home/opc/$APP_DIR/$COMMAND
-    TimeoutStartSec=0
-    User=opc
+[Service]
+Type=simple
+ExecStart=/home/opc/$APP_DIR/${COMMAND}.sh
+TimeoutStartSec=0
+User=opc
 
-    [Install]
-    WantedBy=default.target
+[Install]
+WantedBy=default.target
 EOT
-    sudo cp /tmp/$APP_DIR.service /etc/systemd/system
-    sudo chmod 664 /etc/systemd/system/$APP_DIR.service
+    sudo cp /tmp/$COMMAND.service /etc/systemd/system
+    sudo chmod 664 /etc/systemd/system/$COMMAND.service
     sudo systemctl daemon-reload
-    sudo systemctl enable $APP_DIR.service
-    sudo systemctl restart $APP_DIR.service
+    sudo systemctl enable $COMMAND.service
+    sudo systemctl restart $COMMAND.service
 }
 
-create_service db db.sh 
-create_service db rest.sh 
+# Disable SELinux
+# XXXXXX Since OL8, the service does not start if SELINUX=enforcing XXXXXX
+sudo setenforce 0
+sudo sed -i s/^SELINUX=.*$/SELINUX=permissive/ /etc/selinux/config
+
+create_service db db
+create_service db rest 
 
 # Firewalld
 sudo firewall-cmd --zone=public --add-port=80/tcp --permanent

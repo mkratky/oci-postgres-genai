@@ -27,8 +27,13 @@ resource "oci_identity_domains_dynamic_resource_group" "search-bastion-dyngroup"
     schemas = ["urn:ietf:params:scim:schemas:oracle:idcs:DynamicResourceGroup"]
 }
 
-resource "oci_identity_policy" "starter_search_policy" {
+resource "time_sleep" "wait_30_seconds" {
   depends_on = [ oci_identity_domains_dynamic_resource_group.search-bastion-dyngroup, oci_identity_domains_dynamic_resource_group.search-fn-dyngroup ]
+  create_duration = "30s"
+}
+
+resource "oci_identity_policy" "starter_search_policy" {
+  depends_on = [ time_sleep.wait_30_seconds ]
   name           = "${var.prefix}-policy"
   description    = "${var.prefix} policy"
   compartment_id = local.lz_appdev_cmp_ocid
