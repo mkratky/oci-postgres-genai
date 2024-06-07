@@ -28,7 +28,7 @@ resource "oci_identity_domains_dynamic_resource_group" "search-bastion-dyngroup"
 }
 
 resource "oci_identity_policy" "starter_search_policy" {
-  depends_on = [ oci_identity_domains_dynamic_resource_group.build_other.search-bastion-dyngroup,  oci_identity_domains_dynamic_resource_group.search-fn-dyngroup ]
+  depends_on = [ oci_identity_domains_dynamic_resource_group.search-bastion-dyngroup, oci_identity_domains_dynamic_resource_group.search-fn-dyngroup ]
   name           = "${var.prefix}-policy"
   description    = "${var.prefix} policy"
   compartment_id = local.lz_appdev_cmp_ocid
