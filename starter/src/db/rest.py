@@ -1,16 +1,20 @@
-import os
-import traceback
 from flask import Flask
 from flask import jsonify
+from flask import request
 from flask_cors import CORS
-import psycopg2
 import search_shared
+import oci
 
 app = Flask(__name__)
 CORS(app)
 
+# OCI
+signer = oci.auth.signers.InstancePrincipalsSecurityTokenSigner()
+config = {'region': signer.region, 'tenancy': signer.tenancy_id}
+
 @app.route('/query')
 def query():
+    global signer
     a = []
     type = request.args.get('type')
     question = request.args.get('question')

@@ -6,4 +6,4 @@ cd $SCRIPT_DIR
 
 python3.9 rest.py 2>&1 | tee rest.log
 
-
+# Ex: curl "http://$BASTION_IP:8080/query?type=text&question=jazz"
