@@ -14,7 +14,6 @@ pip3.9 install -r requirements.txt
 curl -s -H "Authorization: Bearer Oracle" -L http://169.254.169.254/opc/v2/instance/ > /tmp/instance.json
 export TF_VAR_compartment_ocid=`cat /tmp/instance.json | jq -r .compartmentId`
 
-
 ### XXXXXXX
 env
 ### XXXXXXX
@@ -31,29 +30,34 @@ sed -i "s/##FN_OCID##/$FN_OCID/" $CONFIG_FILE
 sed -i "s!##STREAM_MESSAGE_ENDPOINT##!$STREAM_MESSAGE_ENDPOINT!" $CONFIG_FILE
 sed -i "s!##FN_INVOKE_ENDPOINT##!$FN_INVOKE_ENDPOINT!" $CONFIG_FILE
 
-APP_DIR=db
+# Create services
+create_service () {
+    APP_DIR=$1
+    COMMAND=$2
+    # Create an db service
+    cat > /tmp/$APP_DIR.service << EOT
+    [Unit]
+    Description=App
+    After=network.target
 
-# Create an APP service
-cat > /tmp/$APP_DIR.service << EOT
-[Unit]
-Description=App
-After=network.target
+    [Service]
+    Type=simple
+    ExecStart=/home/opc/$APP_DIR/start.sh
+    TimeoutStartSec=0
+    User=opc
 
-[Service]
-Type=simple
-ExecStart=/home/opc/$APP_DIR/start.sh
-TimeoutStartSec=0
-User=opc
-
-[Install]
-WantedBy=default.target
+    [Install]
+    WantedBy=default.target
 EOT
+    sudo cp /tmp/$APP_DIR.service /etc/systemd/system
+    sudo chmod 664 /etc/systemd/system/$APP_DIR.service
+    sudo systemctl daemon-reload
+    sudo systemctl enable $APP_DIR.service
+    sudo systemctl restart $APP_DIR.service
+}
 
-sudo cp /tmp/$APP_DIR.service /etc/systemd/system
-sudo chmod 664 /etc/systemd/system/$APP_DIR.service
-sudo systemctl daemon-reload
-sudo systemctl enable $APP_DIR.service
-sudo systemctl restart $APP_DIR.service
+create_service db db.sh 
+create_service rest rest.sh 
 
 # Firewalld
 sudo firewall-cmd --zone=public --add-port=80/tcp --permanent

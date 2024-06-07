@@ -4,6 +4,4 @@ cd $SCRIPT_DIR
 
 . ./env.sh
 
-python3.9 search_ingestion.py 2>&1 | tee search_ingestion.log
-
-
+python3.9 db.py 2>&1 | tee db.log
