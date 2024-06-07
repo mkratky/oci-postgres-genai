@@ -4,32 +4,29 @@ from flask import Flask
 from flask import jsonify
 from flask_cors import CORS
 import psycopg2
+import search_shared
 
 app = Flask(__name__)
 CORS(app)
 
-@app.route('/dept')
-def dept():
+@app.route('/query')
+def query():
     a = []
+    type = request.args.get('type')
+    question = request.args.get('question')
+    search_shared.log( "----------------------------------------")
+    search_shared.log( "type: " + type)
+    search_shared.log( "question: " + question)
     try:
-        conn = psycopg2.connect(
-            host=os.getenv('DB_URL'),
-            database="postgres",
-            user=os.getenv('DB_USER'),
-            password=os.getenv('DB_PASSWORD'),
-            sslmode='require' )
-        print("Successfully connected to database", flush=True)
-        cursor = conn.cursor()
-        cursor.execute("SELECT deptno, dname, loc FROM dept")
-        deptRows = cursor.fetchall()
-        for row in deptRows:
-            a.append( {"deptno": row[0], "dname": row[1], "loc": row[2]} )        
-    except Exception as e:
-        print(traceback.format_exc(), flush=True)
-        print(e, flush=True)
+        search_shared.initDbConn()
+        embed = search_shared.embedText(question,signer)
+        a = search_shared.queryDb( type, question, embed) 
+        if type=="rag":
+            # XX TODO
+            search_shared.genai( question, a )    
     finally:
-        cursor.close() 
-        conn.close() 
+        search_shared.closeDbConn()
+
     response = jsonify(a)
     response.status_code = 200
     return response   
