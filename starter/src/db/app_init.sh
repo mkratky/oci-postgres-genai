@@ -37,12 +37,12 @@ create_service () {
     # Create an db service
     cat > /tmp/$APP_DIR.service << EOT
     [Unit]
-    Description=App
+    Description=$COMMAND
     After=network.target
 
     [Service]
     Type=simple
-    ExecStart=/home/opc/$APP_DIR/start.sh
+    ExecStart=/home/opc/$APP_DIR/$COMMAND
     TimeoutStartSec=0
     User=opc
 
@@ -57,7 +57,7 @@ EOT
 }
 
 create_service db db.sh 
-create_service rest rest.sh 
+create_service db rest.sh 
 
 # Firewalld
 sudo firewall-cmd --zone=public --add-port=80/tcp --permanent
