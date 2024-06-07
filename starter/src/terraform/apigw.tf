@@ -60,11 +60,11 @@ resource "oci_apigateway_deployment" "starter_apigw_deployment" {
       }
     }
     routes {
-      path    = "/app/dept"
+      path    = "/app/query"
       methods = [ "ANY" ]
       backend {
-        type = "ORACLE_FUNCTIONS_BACKEND"
-        function_id   = oci_functions_function.starter_fn_function[0].id
+        type = "HTTP_BACKEND"
+        url    = "http://${data.oci_core_instance.starter_bastion.public_ip}:8080/query"
       }
     }    
     routes {
