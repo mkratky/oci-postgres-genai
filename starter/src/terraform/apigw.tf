@@ -65,6 +65,9 @@ resource "oci_apigateway_deployment" "starter_apigw_deployment" {
       backend {
         type = "HTTP_BACKEND"
         url    = "http://${data.oci_core_instance.starter_bastion.public_ip}:8080/query"
+        connect_timeout_in_seconds = 10
+        read_timeout_in_seconds = 30
+        send_timeout_in_seconds = 30        
       }
     }    
     routes {
