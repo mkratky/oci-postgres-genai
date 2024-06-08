@@ -56,5 +56,5 @@ EOT
     sudo systemctl restart $COMMAND.service
 }
 
-create_service db db
-create_service db rest 
+create_service app db
+create_service app rest 
