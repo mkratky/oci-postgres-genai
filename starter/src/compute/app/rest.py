@@ -32,14 +32,12 @@ def query():
     response.status_code = 200
     return response   
 
-@app.route('/generateText')
-def generateText():
+@app.route('/generate')
+def generate():
     global signer
     prompt = request.args.get('prompt')
     result = search_shared.generateText( prompt, signer )    
-    response = jsonify(a)
-    response.status_code = 200
-    return response   
+    return str(result)   
 
 @app.route('/info')
 def info():

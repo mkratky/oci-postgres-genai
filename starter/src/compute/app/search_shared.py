@@ -84,7 +84,7 @@ def generateText(prompt,signer):
             "presencePenalty": 0,
             "topP": 0.75,
             "topK": 0,
-            "isStream": false,
+            "isStream": False,
             "stopSequences": [],
             "runtimeType": "COHERE"
         }
@@ -97,7 +97,7 @@ def generateText(prompt,signer):
     j = json.loads(resp.content)   
     s = j["inferenceResponse"]["generatedTexts"][0]["text"]
     log( "</generateText>")
-    return set
+    return s
 
 
 ## -- initDbConn --------------------------------------------------------------
