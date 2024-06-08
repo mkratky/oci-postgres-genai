@@ -64,6 +64,42 @@ def embedText(c,signer):
     log( "</embedText>")
     return dictValue(j,"embeddings")[0] 
 
+## -- generateText ------------------------------------------------------
+
+def generateText(prompt,signer):
+    log( "<generateText>")
+    compartmentId = os.getenv("TF_VAR_compartment_ocid")
+    endpoint = 'https://inference.generativeai.us-chicago-1.oci.oraclecloud.com/20231130/actions/generateText'
+    body = {
+        "compartmentId": compartmentId,
+        "servingMode": {
+            "modelId": "ocid1.generativeaimodel.oc1.us-chicago-1.amaaaaaask7dceyafhwal37hxwylnpbcncidimbwteff4xha77n5xz4m7p6a",
+            "servingType": "ON_DEMAND"
+        },
+        "inferenceRequest": {
+            "prompt": prompt,
+            "maxTokens": 600,
+            "temperature": 0,
+            "frequencyPenalty": 0,
+            "presencePenalty": 0,
+            "topP": 0.75,
+            "topK": 0,
+            "isStream": false,
+            "stopSequences": [],
+            "runtimeType": "COHERE"
+        }
+    }
+    resp = requests.post(endpoint, json=body, auth=signer)
+    resp.raise_for_status()
+    log(resp)    
+    # Binary string conversion to utf8
+    log_in_file("generateText_resp", resp.content.decode('utf-8'))
+    j = json.loads(resp.content)   
+    s = j["inferenceResponse"]["generatedTexts"][0]["text"]
+    log( "</generateText>")
+    return set
+
+
 ## -- initDbConn --------------------------------------------------------------
 
 def initDbConn():

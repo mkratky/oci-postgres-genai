@@ -56,16 +56,5 @@ EOT
     sudo systemctl restart $COMMAND.service
 }
 
-# Disable SELinux
-# XXXXXX Since OL8, the service does not start if SELINUX=enforcing XXXXXX
-sudo setenforce 0
-sudo sed -i s/^SELINUX=.*$/SELINUX=permissive/ /etc/selinux/config
-
 create_service db db
 create_service db rest 
-
-# Firewalld
-sudo firewall-cmd --zone=public --add-port=80/tcp --permanent
-sudo firewall-cmd --zone=public --add-port=443/tcp --permanent
-sudo firewall-cmd --zone=public --add-port=8080/tcp --permanent
-sudo firewall-cmd --reload
