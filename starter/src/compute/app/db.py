@@ -208,7 +208,7 @@ def decodeJson(value):
     # Read the JSON file from the object storage
     os_client = oci.object_storage.ObjectStorageClient(config = {}, signer=signer)
     resp = os_client.get_object(namespace_name=namespace, bucket_name=bucketName, object_name=resourceName)
-    file_name = LOG_DIR+"/"+search_shared.UNIQUE_ID+".json"
+    file_name = search_shared.LOG_DIR+"/"+search_shared.UNIQUE_ID+".json"
     with open(file_name, 'wb') as f:
         for chunk in resp.data.raw.stream(1024 * 1024, decode_content=False):
             f.write(chunk)
@@ -515,10 +515,6 @@ def documentUnderstanding(value):
     log( "</documentUnderstanding>")
 
 ## -- main ------------------------------------------------------------------
-
-# Create Log directory
-if os.path.isdir(LOG_DIR) == False:
-    os.mkdir(LOG_DIR) 
 
 # get signer from instance principals token
 ociMessageEndpoint = os.getenv('STREAM_MESSAGE_ENDPOINT')

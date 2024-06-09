@@ -9,6 +9,10 @@ import psycopg2
 LOG_DIR = '/tmp/app_log'
 UNIQUE_ID = "ID"
 
+# Create Log directory
+if os.path.isdir(LOG_DIR) == False:
+    os.mkdir(LOG_DIR) 
+
 # Connection
 dbConn = None
 
@@ -225,3 +229,5 @@ def queryDb( type, question, embed ):
         log("filename="+r["filename"])
         log("content: "+r["content"][:150])
     return result
+
+
