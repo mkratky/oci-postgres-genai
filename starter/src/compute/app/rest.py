@@ -12,12 +12,16 @@ CORS(app)
 signer = oci.auth.signers.InstancePrincipalsSecurityTokenSigner()
 config = {'region': signer.region, 'tenancy': signer.tenancy_id}
 
-@app.route('/query')
+@app.route('/query', methods=['GET','POST'])
 def query():
     global signer
     a = []
-    type = request.args.get('type')
-    question = request.args.get('question')
+    if request.method=='POST':
+        type = request.json.get('type')
+        question = request.json.get('question')
+    else:
+        type = request.args.get('type')
+        question = request.args.get('question')
     search_shared.log( "----------------------------------------")
     search_shared.log( "type: " + str(type))
     search_shared.log( "question: " + str(question))
@@ -32,10 +36,13 @@ def query():
     response.status_code = 200
     return response   
 
-@app.route('/generate')
+@app.route('/generate', methods=['GET','POST'])
 def generate():
     global signer
-    prompt = request.args.get('prompt')
+    if request.method=='POST':
+        prompt = request.json.get('prompt')
+    else:
+        prompt = request.args.get('prompt')
     result = search_shared.generateText( prompt, signer )    
     return str(result)   
 

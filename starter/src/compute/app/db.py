@@ -7,9 +7,15 @@ import pathlib
 import requests
 import psycopg2
 import traceback
+import search_shared
+from search_shared import log
+from search_shared import log_in_file
+from search_shared import dictValue
 
 from psycopg2.extras import execute_values
 from datetime import datetime
+from base64 import b64decode
+
 from base64 import b64decode
 
 # Constant
@@ -18,20 +24,6 @@ UNIQUE_ID = "ID"
 
 # Connection
 dbConn = None
-
-## -- log ------------------------------------------------------------------
-
-def log(s):
-   print( s, flush=True)
-
-## -- dictValue ------------------------------------------------------------
-
-def dictValue(d,key):
-   value = d.get(key)
-   if value is None:
-       return "-"
-   else:
-       return value
 
 ## -- cutInChunks -----------------------------------------------------------
 
@@ -90,15 +82,6 @@ def stream_cursor(sc, sid, group_name, instance_name):
                                                                    commit_on_get=True)
     response = sc.create_group_cursor(sid, cursor_details)
     return response.data.value
-
-## -- log_in_file --------------------------------------------------------
-
-def log_in_file(prefix, value):
-    global UNIQUE_ID
-    filename = LOG_DIR+"/"+prefix+"_"+UNIQUE_ID+".txt"
-    with open(filename, "w") as text_file:
-        text_file.write(value)
-    log("log file: " +filename )    
 
 ## -- stream_loop --------------------------------------------------------
 
@@ -207,15 +190,15 @@ def insertDocument(value):
         # Get Next Chunks
         chuncks = cutInChunks( p )
         for c in chuncks:
-            result["cohereEmbed"] = embedText(c)
-            insertDb(result,c)
+            result["cohereEmbed"] = search_shared.embedText(c,signer)
+            search_shared.insertDb(result,c)
                 
 ## -- deleteDocument --------------------------------------------------------
 
 def deleteDocument(value):
     log( "<deleteDocument>")
     resourceId = value["data"]["resourceId"]
-    deleteDb(resourceId)
+    search_shared.deleteDb(resourceId)
     log( "</deleteDocument>")
 
 
@@ -346,33 +329,6 @@ def summarizeContent(value,content):
     j = json.loads(resp.content)   
     log( "</summarizeContent>")
     return dictValue(j,"summary") 
-
-## -- embedText ------------------------------------------------------
-
-#XXXXX Ideally all vector should be created in one call
-def embedText(c):
-    log( "<embedText>")
-    global signer
-    compartmentId = os.getenv("TF_VAR_compartment_ocid")
-    endpoint = 'https://inference.generativeai.us-chicago-1.oci.oraclecloud.com/20231130/actions/embedText'
-    body = {
-        "inputs" : [ c ],
-        "servingMode" : {
-            "servingType" : "ON_DEMAND",
-            "modelId" : "cohere.embed-english-light-v2.0"
-        },
-        "truncate" : "START",
-        "compartmentId" : compartmentId
-    }
-    resp = requests.post(endpoint, json=body, auth=signer)
-    resp.raise_for_status()
-    log(resp)    
-    # Binary string conversion to utf8
-    log_in_file("embedText_resp", resp.content.decode('utf-8'))
-    j = json.loads(resp.content)   
-    log( "</embedText>")
-    return dictValue(j,"embeddings")[0] 
-
 
 ## -- vision --------------------------------------------------------------
 
@@ -572,79 +528,6 @@ def documentUnderstanding(value):
     log_in_file("documentUnderstanding_resp",str(resp.data))
     log( "</documentUnderstanding>")
 
-## -- initDbConn --------------------------------------------------------------
-
-def initDbConn():
-    global dbConn 
-    dbConn = psycopg2.connect(dbname="postgres", user=os.getenv('DB_USER'), password=os.getenv('DB_PASSWORD'), host=os.getenv('DB_URL'))
-    dbConn.autocommit = True
-
-## -- closeDbConn --------------------------------------------------------------
-
-def closeDbConn():
-    global dbConn 
-    dbConn.close()
-
-# -- insertDb -----------------------------------------------------------------
-
-def insertDb(result,c):  
-    global dbConn
-    cur = dbConn.cursor()
-    stmt = """
-        INSERT INTO oic (
-            application_name, author, translation, cohere_embed, content, content_type,
-            creation_date, date, modified, other1, other2, other3, parsed_by,
-            filename, path, publisher, region, context
-        )
-        VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
-    """
-    data = [
-        (dictValue(result,"applicationName"), 
-            dictValue(result,"author"),
-            dictValue(result,"translation"),
-            dictValue(result,"cohereEmbed"),
-            c,
-            dictValue(result,"contentType"),
-            dictValue(result,"creationDate"),
-            dictValue(result,"date"),
-            dictValue(result,"modified"),
-            dictValue(result,"other1"),
-            dictValue(result,"other2"),
-            dictValue(result,"other3"),
-            dictValue(result,"parsed_by"),
-            dictValue(result,"filename"),
-            dictValue(result,"path"),
-            dictValue(result,"publisher"),
-            dictValue(result,"region"),
-            dictValue(result,"context")
-        )
-    ]
-    try:
-        cur.executemany(stmt, data)
-        print(f"Successfully inserted {cur.rowcount} records.")
-    except (Exception, psycopg2.Error) as error:
-        print(f"Error inserting records: {error}")
-    finally:
-        # Close the cursor and connection
-        if cur:
-            cur.close()
-
-# -- deleteDb -----------------------------------------------------------------
-
-def deleteDb(path):  
-    global dbConn
-    cur = dbConn.cursor()
-    stmt = "delete from oic where path=%s"
-    try:
-        cur.execute(stmt, (path,))
-        print(f"<deleteDb> Successfully {cur.rowcount} records deleted")
-    except (Exception, psycopg2.Error) as error:
-        print(f"<deleteDb> Error deleting: {error}")
-    finally:
-        # Close the cursor and connection
-        if cur:
-            cur.close()
-
 ## -- main ------------------------------------------------------------------
 
 # Create Log directory
@@ -666,8 +549,8 @@ stream_client = oci.streaming.StreamClient(config = {}, service_endpoint=ociMess
 # are dynamically balanced amongst consumers in the group.
 
 while True:
-    initDbConn()
+    search_shared.initDbConn()
     group_cursor = stream_cursor(stream_client, ociStreamOcid, "app-group", "app-instance-1")
     stream_loop(stream_client, ociStreamOcid, group_cursor)
-    closeDbConn()
+    search_shared.closeDbConn()
     time.sleep(30)

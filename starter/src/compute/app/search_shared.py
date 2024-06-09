@@ -122,7 +122,7 @@ def insertDb(result,c):
         INSERT INTO oic (
             application_name, author, translation, cohere_embed, content, content_type,
             creation_date, date, modified, other1, other2, other3, parsed_by,
-            filename, path, publisher, region, context
+            filename, path, publisher, region, context, page
         )
         VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
     """
@@ -144,7 +144,8 @@ def insertDb(result,c):
             dictValue(result,"path"),
             dictValue(result,"publisher"),
             dictValue(result,"region"),
-            dictValue(result,"context")
+            dictValue(result,"context"),
+            dictValue(result,"page")
         )
     ]
     try:
@@ -177,7 +178,7 @@ def deleteDb(path):
 # -- queryDb ----------------------------------------------------------------------
 
 def queryDb( type, question, embed ):
-    query = "SELECT filename, path, content, content_type FROM oic"
+    query = "SELECT filename, path, content, content_type, region, page, context FROM oic"
     if type=="text":
         # Text search example
         query += " WHERE content ILIKE '%{0}%'".format(question)
@@ -194,7 +195,7 @@ def queryDb( type, question, embed ):
             SELECT id, cohere_embed <=> '{1}' AS vector_distance
             FROM oic
         )
-        SELECT o.filename, o.path, o.content, o.content_type,
+        SELECT o.filename, o.path, o.content, o.content_type, o.region, o.page, o.context,
             (0.3 * ts.text_rank + 0.7 * (1 - vs.vector_distance)) AS hybrid_score
         FROM oic o
         JOIN text_search ts ON o.id = ts.id
@@ -210,7 +211,7 @@ def queryDb( type, question, embed ):
     cursor.execute(query)
     deptRows = cursor.fetchall()
     for row in deptRows:
-        result.append( {"filename": row[0], "path": row[1], "content": row[2], "contentType": row[3]} )  
+        result.append( {"filename": row[0], "path": row[1], "content": row[2], "contentType": row[3], "region": row[4], "page": row[5], "context": row[6]} )  
     for r in result:
         log("filename="+r["filename"])
         log("content: "+r["content"][:150])
