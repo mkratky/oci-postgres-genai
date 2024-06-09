@@ -34,8 +34,8 @@ CREATE TABLE oic (
     path varchar(1024),    
     publisher varchar(256),    
     region varchar(256),    
-    context text,
-    page number
+    summary text,
+    page integer
 );
 
 

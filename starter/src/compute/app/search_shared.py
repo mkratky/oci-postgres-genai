@@ -29,14 +29,23 @@ def log_in_file(prefix, value):
         text_file.write(value)
     log("log file: " +filename )  
 
-## -- dictValue ------------------------------------------------------------
+## -- dictString ------------------------------------------------------------
 
-def dictValue(d,key):
+def dictString(d,key):
    value = d.get(key)
    if value is None:
        return "-"
    else:
        return value  
+   
+## -- dictInt ------------------------------------------------------------
+
+def dictInt(d,key):
+   value = d.get(key)
+   if value is None:
+       return 0
+   else:
+       return int(value)     
 
 
 ## -- embedText ------------------------------------------------------
@@ -62,7 +71,7 @@ def embedText(c,signer):
     log_in_file("embedText_resp", resp.content.decode('utf-8'))
     j = json.loads(resp.content)   
     log( "</embedText>")
-    return dictValue(j,"embeddings")[0] 
+    return dictString(j,"embeddings")[0] 
 
 ## -- generateText ------------------------------------------------------
 
@@ -122,30 +131,30 @@ def insertDb(result,c):
         INSERT INTO oic (
             application_name, author, translation, cohere_embed, content, content_type,
             creation_date, date, modified, other1, other2, other3, parsed_by,
-            filename, path, publisher, region, context, page
+            filename, path, publisher, region, summary, page
         )
-        VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+        VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
     """
     data = [
-        (dictValue(result,"applicationName"), 
-            dictValue(result,"author"),
-            dictValue(result,"translation"),
-            dictValue(result,"cohereEmbed"),
+        (dictString(result,"applicationName"), 
+            dictString(result,"author"),
+            dictString(result,"translation"),
+            dictString(result,"cohereEmbed"),
             c,
-            dictValue(result,"contentType"),
-            dictValue(result,"creationDate"),
-            dictValue(result,"date"),
-            dictValue(result,"modified"),
-            dictValue(result,"other1"),
-            dictValue(result,"other2"),
-            dictValue(result,"other3"),
-            dictValue(result,"parsed_by"),
-            dictValue(result,"filename"),
-            dictValue(result,"path"),
-            dictValue(result,"publisher"),
-            dictValue(result,"region"),
-            dictValue(result,"context"),
-            dictValue(result,"page")
+            dictString(result,"contentType"),
+            dictString(result,"creationDate"),
+            dictString(result,"date"),
+            dictString(result,"modified"),
+            dictString(result,"other1"),
+            dictString(result,"other2"),
+            dictString(result,"other3"),
+            dictString(result,"parsed_by"),
+            dictString(result,"filename"),
+            dictString(result,"path"),
+            dictString(result,"publisher"),
+            dictString(result,"region"),
+            dictString(result,"summary"),
+            dictInt(result,"page")
         )
     ]
     try:
@@ -178,11 +187,11 @@ def deleteDb(path):
 # -- queryDb ----------------------------------------------------------------------
 
 def queryDb( type, question, embed ):
-    query = "SELECT filename, path, content, content_type, region, page, context FROM oic"
-    if type=="text":
+    query = "SELECT filename, path, content, content_type, region, page, summary FROM oic"
+    if type=="search":
         # Text search example
         query += " WHERE content ILIKE '%{0}%'".format(question)
-    elif type=="vector":
+    elif type=="semantic":
         query += " ORDER BY cohere_embed <=> '{0}' LIMIT 10;".format(embed)
     elif type in ["hybrid","rag"] :
         query = """
@@ -195,7 +204,7 @@ def queryDb( type, question, embed ):
             SELECT id, cohere_embed <=> '{1}' AS vector_distance
             FROM oic
         )
-        SELECT o.filename, o.path, o.content, o.content_type, o.region, o.page, o.context,
+        SELECT o.filename, o.path, o.content, o.content_type, o.region, o.page, o.summary,
             (0.3 * ts.text_rank + 0.7 * (1 - vs.vector_distance)) AS hybrid_score
         FROM oic o
         JOIN text_search ts ON o.id = ts.id
@@ -211,7 +220,7 @@ def queryDb( type, question, embed ):
     cursor.execute(query)
     deptRows = cursor.fetchall()
     for row in deptRows:
-        result.append( {"filename": row[0], "path": row[1], "content": row[2], "contentType": row[3], "region": row[4], "page": row[5], "context": row[6]} )  
+        result.append( {"filename": row[0], "path": row[1], "content": row[2], "contentType": row[3], "region": row[4], "page": row[5], "summary": row[6]} )  
     for r in result:
         log("filename="+r["filename"])
         log("content: "+r["content"][:150])

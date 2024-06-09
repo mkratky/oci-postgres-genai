@@ -10,20 +10,13 @@ import traceback
 import search_shared
 from search_shared import log
 from search_shared import log_in_file
-from search_shared import dictValue
+from search_shared import dictString
 
 from psycopg2.extras import execute_values
 from datetime import datetime
 from base64 import b64decode
 
 from base64 import b64decode
-
-# Constant
-LOG_DIR = '/tmp/app_log'
-UNIQUE_ID = "ID"
-
-# Connection
-dbConn = None
 
 ## -- cutInChunks -----------------------------------------------------------
 
@@ -86,7 +79,6 @@ def stream_cursor(sc, sid, group_name, instance_name):
 ## -- stream_loop --------------------------------------------------------
 
 def stream_loop(client, stream_id, initial_cursor):
-    global UNIQUE_ID 
     cursor = initial_cursor
     while True:
         get_response = client.get_messages(stream_id, cursor, limit=10)
@@ -105,7 +97,7 @@ def stream_loop(client, stream_id, initial_cursor):
                     key = b64decode(message.key.encode()).decode()
                 json_value = b64decode(message.value.encode()).decode(); 
                 log(json_value)
-                UNIQUE_ID = datetime.now().strftime("%Y%m%d-%H%M%S.%f")
+                search_shared.UNIQUE_ID = datetime.now().strftime("%Y%m%d-%H%M%S.%f")
                 log_in_file("stream", json_value)
                 value = json.loads(json_value)
                 eventDocument(value)
@@ -124,7 +116,6 @@ def stream_loop(client, stream_id, initial_cursor):
 ## -- eventDocument --------------------------------------------------------
 
 def eventDocument(value):
-    global UNIQUE_ID 
     eventType = value["eventType"]
     # ex: /n/fr03kzmuvhtf/b/psql-public-bucket/o/country.pdf"
     # XXX OIC: resourcePath
@@ -207,7 +198,6 @@ def deleteDocument(value):
 def decodeJson(value):
     log( "<decodeJson>")
     global signer
-    global UNIQUE_ID 
     fnOcid = os.getenv('FN_OCID')
     fnInvokeEndpoint = os.getenv('FN_INVOKE_ENDPOINT')
     namespace = value["data"]["additionalDetails"]["namespace"]
@@ -218,7 +208,7 @@ def decodeJson(value):
     # Read the JSON file from the object storage
     os_client = oci.object_storage.ObjectStorageClient(config = {}, signer=signer)
     resp = os_client.get_object(namespace_name=namespace, bucket_name=bucketName, object_name=resourceName)
-    file_name = LOG_DIR+"/"+UNIQUE_ID+".json"
+    file_name = LOG_DIR+"/"+search_shared.UNIQUE_ID+".json"
     with open(file_name, 'wb') as f:
         for chunk in resp.data.raw.stream(1024 * 1024, decode_content=False):
             f.write(chunk)
@@ -241,11 +231,11 @@ def decodeJson(value):
         original_resourcename = resourceName[:resourceName.index(".json")][resourceName.index("/results/"):]
         result = {
             "filename": original_resourcename,
-            "date": UNIQUE_ID,
+            "date": search_shared.UNIQUE_ID,
             "applicationName": "OCI Document Understanding",
-            "modified": UNIQUE_ID,
+            "modified": search_shared.UNIQUE_ID,
             "contentType": j["documentMetadata"]["mimeType"],
-            "creationDate": UNIQUE_ID,
+            "creationDate": search_shared.UNIQUE_ID,
             "content": concat_text,
             "pages": pages,
             "path": resourceId
@@ -255,11 +245,11 @@ def decodeJson(value):
         original_resourcename = "/n/" + namespace + "/b/" + bucketName + "/o/" + resourceName[:resourceName.index(".json")][resourceName.index("_"):]
         result = {
             "filename": original_resourcename,
-            "date": UNIQUE_ID,
+            "date": search_shared.UNIQUE_ID,
             "applicationName": "OCI Speech",
-            "modified": UNIQUE_ID,
+            "modified": search_shared.UNIQUE_ID,
             "contentType": j["audioFormatDetails"]["format"],
-            "creationDate": UNIQUE_ID,
+            "creationDate": search_shared.UNIQUE_ID,
             "content": j["transcriptions"][0]["transcription"],
             "path": resourceId
         }
@@ -271,7 +261,6 @@ def decodeJson(value):
 def invokeTika(value):
     log( "<invokeTika>")
     global signer
-    global UNIQUE_ID 
     fnOcid = os.getenv('FN_OCID')
     fnInvokeEndpoint = os.getenv('FN_INVOKE_ENDPOINT')
     namespace = value["data"]["additionalDetails"]["namespace"]
@@ -288,14 +277,14 @@ def invokeTika(value):
     j = json.loads(resp.data.text)
     result = {
         "filename": resourceName,
-        "date": UNIQUE_ID,
+        "date": search_shared.UNIQUE_ID,
         "applicationName": "Tika Parser",
-        "modified": UNIQUE_ID,
-        "contentType": dictValue(j,"Content-Type"),
-        "parsedBy": dictValue(j,"X-Parsed-By"),
-        "creationDate": UNIQUE_ID,
-        "author": dictValue(j,"Author"),
-        "publisher": dictValue(j,"publisher"),
+        "modified": search_shared.UNIQUE_ID,
+        "contentType": dictString(j,"Content-Type"),
+        "parsedBy": dictString(j,"X-Parsed-By"),
+        "creationDate": search_shared.UNIQUE_ID,
+        "author": dictString(j,"Author"),
+        "publisher": dictString(j,"publisher"),
         "content": j["content"],
         "path": resourceId
     }
@@ -328,13 +317,12 @@ def summarizeContent(value,content):
     log_in_file("summarizeContent_resp",str(resp.content)) 
     j = json.loads(resp.content)   
     log( "</summarizeContent>")
-    return dictValue(j,"summary") 
+    return dictString(j,"summary") 
 
 ## -- vision --------------------------------------------------------------
 
 def vision(value):
     log( "<vision>")
-    global UNIQUE_ID 
     namespace = value["data"]["additionalDetails"]["namespace"]
     bucketName = value["data"]["additionalDetails"]["bucketName"]
     resourceName = value["data"]["resourceName"]
@@ -375,11 +363,11 @@ def vision(value):
 
     result = {
         "filename": resourceName,
-        "date": UNIQUE_ID,
-        "modified": UNIQUE_ID,
+        "date": search_shared.UNIQUE_ID,
+        "modified": search_shared.UNIQUE_ID,
         "contentType": "Image",
         "parsedBy": "OCI Vision",
-        "creationDate": UNIQUE_ID,
+        "creationDate": search_shared.UNIQUE_ID,
         "content": concat_imageText + " " + concat_labels,
         "path": resourceId,
         "other1": concat_labels
@@ -391,7 +379,6 @@ def vision(value):
 
 def belgian(value):
     log( "<belgian>")
-    global UNIQUE_ID 
     namespace = value["data"]["additionalDetails"]["namespace"]
     bucketName = value["data"]["additionalDetails"]["bucketName"]
     resourceName = value["data"]["resourceName"]
@@ -427,11 +414,11 @@ def belgian(value):
 
     result = {
         "filename": resourceName,
-        "date": UNIQUE_ID,
-        "modified": UNIQUE_ID,
+        "date": search_shared.UNIQUE_ID,
+        "modified": search_shared.UNIQUE_ID,
         "contentType": "Belgian ID",
         "parsedBy": "OCI Vision",
-        "creationDate": UNIQUE_ID,
+        "creationDate": search_shared.UNIQUE_ID,
         "content": "Belgian identity card. Name="+name,
         "path": resourceId,
         "other1": id,
@@ -444,7 +431,6 @@ def belgian(value):
 
 def speech(value):
     log( "<speech>")
-    global UNIQUE_ID 
     namespace = value["data"]["additionalDetails"]["namespace"]
     bucketName = value["data"]["additionalDetails"]["bucketName"]
     resourceName = value["data"]["resourceName"]
@@ -456,7 +442,7 @@ def speech(value):
                 "isPunctuationEnabled": True
         },
         "compartmentId": compartmentId,
-        "displayName": UNIQUE_ID,
+        "displayName": search_shared.UNIQUE_ID,
         "modelDetails": {
                 "domain": "GENERIC",
                 "languageCode": "en-US"

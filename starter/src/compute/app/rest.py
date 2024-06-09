@@ -3,6 +3,7 @@ from flask import jsonify
 from flask import request
 from flask_cors import CORS
 import search_shared
+from search_shared import log
 import oci
 
 app = Flask(__name__)
@@ -22,9 +23,9 @@ def query():
     else:
         type = request.args.get('type')
         question = request.args.get('question')
-    search_shared.log( "----------------------------------------")
-    search_shared.log( "type: " + str(type))
-    search_shared.log( "question: " + str(question))
+    log( "----------------------------------------")
+    log( "type: " + str(type))
+    log( "question: " + str(question))
     try:
         search_shared.initDbConn()
         embed = search_shared.embedText(question, signer)
@@ -49,7 +50,6 @@ def generate():
 @app.route('/info')
 def info():
         return "Python - Flask - PSQL"          
-
 
 
 if __name__ == "__main__":

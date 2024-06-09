@@ -26,7 +26,7 @@ CREATE TABLE oic (
     path VARCHAR(255),
     publisher TEXT,
     region VARCHAR(255),
-    context TEXT
+    summary TEXT
 );
 3. Create Indexes for Efficient Searching
 Create indexes to optimize searching, especially for the vector field.
@@ -51,7 +51,7 @@ def insert_document_chunks(documents):
     query = """
     INSERT INTO oic (application_name, author, translation, cohere_embed, content, content_type, 
                      creation_date, date, modified, other1, other2, other3, parsed_by, 
-                     filename, path, publisher, region, context)
+                     filename, path, publisher, region, summary)
     VALUES %s
     """
     execute_values(cur, query, documents)
@@ -61,7 +61,7 @@ def insert_document_chunks(documents):
 documents = [
     ("app1", "author1", "translation1", [0.1, 0.2, 0.3], "content1", "text", "2024-06-05T12:31:21.393Z",
      "2024-06-05T12:31:21.393Z", "2024-06-05T12:31:21.393Z", "other1", "other2", "other3", "parsed_by",
-     "filename1", "path1", "publisher1", "region1", "context1")
+     "filename1", "path1", "publisher1", "region1", "summary1")
 ]
 
 # Insert document chunks
