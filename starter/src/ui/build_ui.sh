@@ -31,6 +31,7 @@ fi
 # node_modules/grunt-cli/bin/grunt vb-process-local
 # If there is the error: Fatal error: Missing mandatory component exchange URL, please add "url:ce"
 # See: Component exchange login (static value), see https://docs.oracle.com/en/cloud/paas/app-builder-cloud/abcag/manage-your-component-exchange.html#GUID-44796BE5-C613-497F-B1F5-437E3AC0EC05 
+sed -i 's/const REST_SERVER =.*$/const REST_SERVER = ""/' webApps/search_ui/flows/simple/pages/input-search-page-chains/searchActionJS.js
 node_modules/grunt-cli/bin/grunt vb-process-local  --url:ce=https://devinstance4wd8us2-wd4devcs8us2.uscom-central-1.oraclecloud.com/profile/devinstance4wd8us2-wd4devcs8us2/s/devinstance4wd8us2-wd4devcs8us2_compcatalog_3461/compcatalog/0.2.0 --username:ce=comp.catalog --password:ce="bXwphh6RMFjn#g"
 
 exit_on_error
