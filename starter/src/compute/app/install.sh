@@ -14,10 +14,6 @@ pip3.9 install -r requirements.txt
 curl -s -H "Authorization: Bearer Oracle" -L http://169.254.169.254/opc/v2/instance/ > /tmp/instance.json
 export TF_VAR_compartment_ocid=`cat /tmp/instance.json | jq -r .compartmentId`
 
-### XXXXXXX
-env
-### XXXXXXX
-
 # Change the env.sh
 CONFIG_FILE=env.sh
 sed -i "s/##DB_USER##/$DB_USER/" $CONFIG_FILE
