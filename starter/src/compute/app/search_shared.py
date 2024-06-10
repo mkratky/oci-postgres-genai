@@ -156,7 +156,7 @@ def insertDb(result,c):
             dictString(result,"filename"),
             dictString(result,"path"),
             dictString(result,"publisher"),
-            dictString(result,"region"),
+            os.getenv("TF_VAR_region"),
             dictString(result,"summary"),
             dictInt(result,"page")
         )
@@ -202,7 +202,7 @@ def queryDb( type, question, embed ):
         WITH text_search AS (
             SELECT id, ts_rank_cd(to_tsvector(content), plainto_tsquery('{0}')) AS text_rank
             FROM oic
-            WHERE content @@ plainto_tsquery('{0}')
+            WHERE to_tsvector(content) @@ plainto_tsquery('{0}')
         ),
         vector_search AS (
             SELECT id, cohere_embed <=> '{1}' AS vector_distance

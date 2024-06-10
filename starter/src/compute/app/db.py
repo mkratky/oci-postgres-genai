@@ -52,6 +52,8 @@ def cutInChunks(text):
                chunck_end = last_medium_separator
             elif last_bad_separator > 0:
                chunck_end = last_bad_separator
+            if text[chunck_end] in [ "[", "(" ]:
+                chunck_end -=1
             chunck = text[chunck_start:chunck_end]
             log("chunck_start= " + str(chunck_start) + " - " + chunck)   
             result.append( chunck )
@@ -63,7 +65,16 @@ def cutInChunks(text):
     chunck = text[chunck_start:]
     log("chunck_start= " + str(chunck_start) + " - " + chunck)  
     result.append( chunck )
-    return result
+
+    # Improved chucks
+    result2 = [];
+    previous = None
+    for c in chuncks:
+        if previous!=None:
+          result.append( previous + c )
+        previous = c 
+
+    return result2
 
 ## -- stream_cursor --------------------------------------------------------
 
@@ -167,7 +178,7 @@ def insertDocument(value):
     # Summary 
     summary = "-"
     if len(result["content"])>250:
-        summary = summarizeContent(value, result["content"])
+        result["summary"] = summarizeContent(value, result["content"])
     
     # Delete Document in repository
     if value["eventType"] == "com.oraclecloud.objectstorage.updateobject":

@@ -1,0 +1,15 @@
+POST http://xxx.xxx.xxx.xxx/app/generate
+{
+    "prompt": "when was jazz created"
+}
+
+
+POST http://xxx.xxx.xxx.xxx/app/query
+{
+    "type": "search",
+    "question": "jazz"
+}
+
+http://144.24.163.128/app/query?type=search&question=jazz
+
+https://mlbttm2pxpztbvllpsolukscmi.apigateway.eu-frankfurt-1.oci.customer-oci.com/psql/app/query?type=search&question=jazz
