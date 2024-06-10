@@ -69,9 +69,9 @@ def cutInChunks(text):
     # Improved chucks
     result2 = [];
     previous = None
-    for c in chuncks:
+    for c in result:
         if previous!=None:
-          result.append( previous + c )
+          result2.append( previous + c )
         previous = c 
 
     return result2

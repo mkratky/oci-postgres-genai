@@ -40,6 +40,6 @@ oci os object bulk-upload -bn psql-public-bucket -ns $TF_VAR_namespace --overwri
 
 echo
 echo "-- SEARCH_URL -------"
-echo http://$BASTION_IP/"
+echo "http://$BASTION_IP/"
 echo
 echo "Please wait 5 mins. The indexing of the sample files has just started." 
