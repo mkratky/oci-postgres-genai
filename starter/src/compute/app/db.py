@@ -31,9 +31,10 @@ def cutInChunks(text):
     chunck_start = 0
     chunck_end = 0
 
-    for char in text:
+    i = 0
+    while i<len(text)-1:
         i += 1
-        cur = char
+        cur = text[i]
         cur2 = prev + cur
         prev = cur
 
@@ -53,6 +54,7 @@ def cutInChunks(text):
             elif last_bad_separator > 0:
                chunck_end = last_bad_separator
             if text[chunck_end] in [ "[", "(" ]:
+                i -=1
                 chunck_end -=1
             chunck = text[chunck_start:chunck_end]
             log("chunck_start= " + str(chunck_start) + " - " + chunck)   
