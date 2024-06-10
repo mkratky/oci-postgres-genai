@@ -16,6 +16,7 @@ SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
 TF_VAR_deploy_type=compute
 # XXXX
 
+UI_NAME=search_ui
 BUILD_DIR=$TARGET_DIR/jetui
 if [ -d $BUILD_DIR ]; then
   cd $BUILD_DIR
@@ -23,19 +24,21 @@ if [ -d $BUILD_DIR ]; then
 else
   mkdir $BUILD_DIR
   cd $BUILD_DIR
-  unzip $SCRIPT_DIR/starter.zip
+  unzip $SCRIPT_DIR/$UI_NAME.zip
   npm install
 fi
+
 # node_modules/grunt-cli/bin/grunt vb-process-local
 # If there is the error: Fatal error: Missing mandatory component exchange URL, please add "url:ce"
 # See: Component exchange login (static value), see https://docs.oracle.com/en/cloud/paas/app-builder-cloud/abcag/manage-your-component-exchange.html#GUID-44796BE5-C613-497F-B1F5-437E3AC0EC05 
 node_modules/grunt-cli/bin/grunt vb-process-local  --url:ce=https://devinstance4wd8us2-wd4devcs8us2.uscom-central-1.oraclecloud.com/profile/devinstance4wd8us2-wd4devcs8us2/s/devinstance4wd8us2-wd4devcs8us2_compcatalog_3461/compcatalog/0.2.0 --username:ce=comp.catalog --password:ce="bXwphh6RMFjn#g"
+
 exit_on_error
 cd $SCRIPT_DIR
 
 mkdir -p ui
 rm -Rf ui/*
-cp -r $BUILD_DIR/build/processed/webApps/starter/* ui/.
+cp -r $BUILD_DIR/build/processed/webApps/$UI_NAME/* ui/.
 
 # Common Function
 build_ui

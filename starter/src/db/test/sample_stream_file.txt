@@ -25,3 +25,36 @@
         "compartmentId": "ocid1.compartment.oc1..xxxxxxx"
     }
 }
+
+dvm:lookupValue ("CloudRegions", "AD", substring-before 
+(/nssrcmpr:Receive/ns24:MessageCollection/ns24:Message/ns24:request-wrapper/ns22:content/ns22:data/ns22:availabilityDomain, "-AD" ), "Region", "us-ashburn-1" )
+
+[
+{"FRA","eu-frankfurt-1"},
+{"PHX","us-phoenix-1"},
+{"ASH","us-ashburn-1"},
+{"SYD","ap-sydney-1"},
+{"MEL","ap-melbourne-1"},
+{"GRU","sa-saopaulo-1"},
+{"VCP","sa-vinhedo-1"},
+{"YUL","ca-montreal-1"},
+{"YYZ","ca-montreal-1"},
+{"YYZ","ca-toronto-1"},
+{"SCL","sa-santiago-1"},
+{"CDG","eu-paris-1"},
+{"MRS","eu-marseille-1"},
+{"HYD","ap-hyderabad-1"},
+{"BOM","ap-mumbai-1"},
+{"MTZ","il-jerusalem-1"},
+{"LIN","eu-milan-1	"},
+{"KIX","ap-osaka-1"},
+{"XXXX","XXXX"},
+{"XXXX","XXXX"},
+{"XXXX","XXXX"},
+{"XXXX","XXXX"},
+{"XXXX","XXXX"},
+{"XXXX","XXXX"},
+{"XXXX","XXXX"},
+
+
+]
