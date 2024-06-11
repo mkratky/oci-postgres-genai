@@ -10,8 +10,6 @@ INSERT INTO DEPT VALUES (30, 'SALES',      'BEIJING');
 INSERT INTO DEPT VALUES (40, 'OPERATIONS', 'SEOUL');
 
 CREATE EXTENSION  IF NOT EXISTS vector;
--- postgres=> CREATE EXTENSION vector;
--- ERROR:  Extension : vector is not allowed
 
 CREATE TABLE oic (
     id bigserial PRIMARY KEY, 

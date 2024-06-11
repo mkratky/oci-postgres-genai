@@ -12,7 +12,6 @@ from search_shared import log
 from search_shared import log_in_file
 from search_shared import dictString
 
-from psycopg2.extras import execute_values
 from datetime import datetime
 from base64 import b64decode
 
@@ -68,15 +67,17 @@ def cutInChunks(text):
     log("chunck_start= " + str(chunck_start) + " - " + chunck)  
     result.append( chunck )
 
-    # Improved chucks
-    result2 = [];
-    previous = None
-    for c in result:
-        if previous!=None:
-          result2.append( previous + c )
-        previous = c 
-
-    return result2
+    # Overlapping chuncks
+    if len(result)==1:
+        return result
+    else: 
+        result2 = [];
+        previous = None
+        for c in result:
+            if previous!=None:
+                result2.append( previous + c )
+            previous = c 
+        return result2
 
 ## -- stream_cursor --------------------------------------------------------
 
@@ -163,7 +164,7 @@ def insertDocument(value):
         # This will create a SRT file in Object Storage that will create a second even with resourceExtension ".srt" 
         speech(value)
         return
-    elif resourceExtension in [".tif"]:
+    elif resourceExtension in [".tif",".pdf"]:
         # This will create a JSON file in Object Storage that will create a second even with resourceExtension "json" 
         documentUnderstanding(value)
         return
