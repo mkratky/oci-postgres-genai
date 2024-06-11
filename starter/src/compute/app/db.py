@@ -242,7 +242,7 @@ def decodeJson(value):
                 page += l.get("text") + "\n"
             pages.append(page)
             concat_text += page + " "    
-        original_resourcename = resourceName[:resourceName.index(".json")][resourceName.index("/results/"):]
+        original_resourcename = resourceName[:resourceName.index(".json")][resourceName.index("/results/"+9):]
         result = {
             "filename": original_resourcename,
             "date": search_shared.UNIQUE_ID,
@@ -252,11 +252,12 @@ def decodeJson(value):
             "creationDate": search_shared.UNIQUE_ID,
             "content": concat_text,
             "pages": pages,
-            "path": resourceId
+            "path": original_resourcename
         }
     else:
         # Speech
-        original_resourcename = "/n/" + namespace + "/b/" + bucketName + "/o/" + resourceName[:resourceName.index(".json")][resourceName.index("_"):]
+        original_resourcename = resourceName[:resourceName.index(".json")][resourceName.index("_"):]
+        original_resourceid = "/n/" + namespace + "/b/" + bucketName + "/o/" + original_resourcename
         result = {
             "filename": original_resourcename,
             "date": search_shared.UNIQUE_ID,
@@ -265,7 +266,7 @@ def decodeJson(value):
             "contentType": j["audioFormatDetails"]["format"],
             "creationDate": search_shared.UNIQUE_ID,
             "content": j["transcriptions"][0]["transcription"],
-            "path": resourceId
+            "path": original_resourceid
         }
     log( "</decodeJson>")
     return result
