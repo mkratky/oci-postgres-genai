@@ -2,8 +2,9 @@ from flask import Flask
 from flask import jsonify
 from flask import request
 from flask_cors import CORS
-import search_shared
-from search_shared import log
+import shared_oci
+from shared_oci import log
+import shared_db
 import oci
 
 app = Flask(__name__)
@@ -27,11 +28,11 @@ def query():
     log( "type: " + str(type))
     log( "question: " + str(question))
     try:
-        search_shared.initDbConn()
-        embed = search_shared.embedText(question, signer)
-        a = search_shared.queryDb( type, question, embed) 
+        shared_db.initDbConn()
+        embed = shared_oci.embedText(question, signer)
+        a = shared_db.queryDb( type, question, embed) 
     finally:
-        search_shared.closeDbConn()
+        shared_db.closeDbConn()
 
     response = jsonify(a)
     response.status_code = 200
@@ -44,7 +45,8 @@ def generate():
         prompt = request.json.get('prompt')
     else:
         prompt = request.args.get('prompt')
-    result = search_shared.generateText( prompt, signer )    
+    result = shared_oci.generateText( prompt, signer )  
+    log("Result="+str(result))  
     return str(result)   
 
 @app.route('/info')

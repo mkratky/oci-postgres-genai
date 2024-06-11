@@ -1,0 +1,430 @@
+# Import
+import os
+import json 
+import requests
+
+# Constant
+LOG_DIR = '/tmp/app_log'
+UNIQUE_ID = "ID"
+
+# Create Log directory
+if os.path.isdir(LOG_DIR) == False:
+    os.mkdir(LOG_DIR) 
+
+## -- log ------------------------------------------------------------------
+
+def log(s):
+   print( s, flush=True)
+
+## -- log_in_file --------------------------------------------------------
+
+def log_in_file(prefix, value):
+    global UNIQUE_ID
+    # Create Log directory
+    if os.path.isdir(LOG_DIR) == False:
+        os.mkdir(LOG_DIR)     
+    filename = LOG_DIR+"/"+prefix+"_"+UNIQUE_ID+".txt"
+    with open(filename, "w") as text_file:
+        text_file.write(value)
+    log("log file: " +filename )  
+
+## -- dictString ------------------------------------------------------------
+
+def dictString(d,key):
+   value = d.get(key)
+   if value is None:
+       return "-"
+   else:
+       return value  
+   
+## -- dictInt ------------------------------------------------------------
+
+def dictInt(d,key):
+   value = d.get(key)
+   if value is None:
+       return 0
+   else:
+       return int(value)     
+
+
+## -- embedText ------------------------------------------------------
+
+#XXXXX Ideally all vector should be created in one call
+def embedText(c,signer):
+    log( "<embedText>")
+    compartmentId = os.getenv("TF_VAR_compartment_ocid")
+    endpoint = 'https://inference.generativeai.us-chicago-1.oci.oraclecloud.com/20231130/actions/embedText'
+    body = {
+        "inputs" : [ c ],
+        "servingMode" : {
+            "servingType" : "ON_DEMAND",
+            "modelId" : "cohere.embed-english-light-v2.0"
+        },
+        "truncate" : "START",
+        "compartmentId" : compartmentId
+    }
+    resp = requests.post(endpoint, json=body, auth=signer)
+    resp.raise_for_status()
+    log(resp)    
+    # Binary string conversion to utf8
+    log_in_file("embedText_resp", resp.content.decode('utf-8'))
+    j = json.loads(resp.content)   
+    log( "</embedText>")
+    return dictString(j,"embeddings")[0] 
+
+## -- generateText ------------------------------------------------------
+
+def generateText(prompt,signer):
+    log( "<generateText>")
+    compartmentId = os.getenv("TF_VAR_compartment_ocid")
+    endpoint = 'https://inference.generativeai.us-chicago-1.oci.oraclecloud.com/20231130/actions/generateText'
+    body = {
+        "compartmentId": compartmentId,
+        "servingMode": {
+            "modelId": "cohere.command-r-16k",
+            "servingType": "ON_DEMAND"
+        },
+        "inferenceRequest": {
+            "prompt": prompt,
+            "maxTokens": 600,
+            "temperature": 0,
+            "frequencyPenalty": 0,
+            "presencePenalty": 0,
+            "topP": 0.75,
+            "topK": 0,
+            "isStream": False,
+            "stopSequences": [],
+            "runtimeType": "COHERE"
+        }
+    }
+    resp = requests.post(endpoint, json=body, auth=signer)
+    resp.raise_for_status()
+    log(resp)    
+    # Binary string conversion to utf8
+    log_in_file("generateText_resp", resp.content.decode('utf-8'))
+    j = json.loads(resp.content)   
+    s = j["inferenceResponse"]["generatedTexts"][0]["text"]
+    log( "</generateText>")
+    return s
+
+## -- invokeTika ------------------------------------------------------------------
+
+def invokeTika(value):
+    log( "<invokeTika>")
+    global signer
+    fnOcid = os.getenv('FN_OCID')
+    fnInvokeEndpoint = os.getenv('FN_INVOKE_ENDPOINT')
+    namespace = value["data"]["additionalDetails"]["namespace"]
+    bucketName = value["data"]["additionalDetails"]["bucketName"]
+    resourceName = value["data"]["resourceName"]
+    resourceId = value["data"]["resourceId"]
+    
+    invoke_client = oci.functions.FunctionsInvokeClient(config = {}, service_endpoint=fnInvokeEndpoint, signer=signer)
+    # {"bucketName": "xxx", "namespace": "xxx", "resourceName": "xxx"}
+    req = '{"bucketName": "' + bucketName + '", "namespace": "' + namespace + '", "resourceName": "' + resourceName + '"}'
+    log( "Tika request: " + req)
+    resp = invoke_client.invoke_function(fnOcid, invoke_function_body=req)
+    log_in_file("tika_resp", resp.data.text) 
+    j = json.loads(resp.data.text)
+    result = {
+        "filename": resourceName,
+        "date": shared_oci.UNIQUE_ID,
+        "applicationName": "Tika Parser",
+        "modified": shared_oci.UNIQUE_ID,
+        "contentType": dictString(j,"Content-Type"),
+        "parsedBy": dictString(j,"X-Parsed-By"),
+        "creationDate": shared_oci.UNIQUE_ID,
+        "author": dictString(j,"Author"),
+        "publisher": dictString(j,"publisher"),
+        "content": j["content"],
+        "path": resourceId
+    }
+    log( "</invokeTika>")
+    return result
+
+## -- summarizeContent ------------------------------------------------------
+
+def summarizeContent(value,content):
+    log( "<summarizeContent>")
+    global signer
+    compartmentId = value["data"]["compartmentId"]
+    endpoint = 'https://inference.generativeai.us-chicago-1.oci.oraclecloud.com/20231130/actions/summarizeText'
+    body = {
+        "input" : content,
+        "servingMode" : {
+            "modelId" : "cohere.command",
+            "servingType" : "ON_DEMAND"
+        },
+        "temperature" : 1,
+        "length" : "AUTO",
+        "extractiveness" : "AUTO",
+        "format" : "AUTO",
+        "additionalCommand" : "",
+        "compartmentId" : compartmentId
+    }
+    resp = requests.post(endpoint, json=body, auth=signer)
+    resp.raise_for_status()
+    log(resp)   
+    log_in_file("summarizeContent_resp",str(resp.content)) 
+    j = json.loads(resp.content)   
+    log( "</summarizeContent>")
+    return dictString(j,"summary") 
+
+## -- vision --------------------------------------------------------------
+
+def vision(value):
+    log( "<vision>")
+    namespace = value["data"]["additionalDetails"]["namespace"]
+    bucketName = value["data"]["additionalDetails"]["bucketName"]
+    resourceName = value["data"]["resourceName"]
+    compartmentId = value["data"]["compartmentId"]
+    resourceId = value["data"]["resourceId"]
+
+    vision_client = oci.ai_vision.AIServiceVisionClient(config = {}, signer=signer)
+    job = {
+        "compartmentId": compartmentId,
+        "image": {
+            "source": "OBJECT_STORAGE",
+            "bucketName": bucketName,
+            "namespaceName": namespace,
+            "objectName": resourceName
+        },
+        "features": [
+            {
+                    "featureType": "IMAGE_CLASSIFICATION",
+                    "maxResults": 5
+            },
+            {
+                    "featureType": "TEXT_DETECTION"
+            }
+        ]
+    }
+    resp = vision_client.analyze_image(job)
+    log_in_file("vision_resp", str(resp.data)) 
+
+    concat_imageText = ""
+    for l in resp.data.image_text.lines:
+      concat_imageText += l.text + " "
+    log("concat_imageText: " + concat_imageText )
+
+    concat_labels = ""
+    for l in resp.data.labels:
+      concat_labels += l.name + " "
+    log("concat_labels: " +concat_labels )
+
+    result = {
+        "filename": resourceName,
+        "date": shared_oci.UNIQUE_ID,
+        "modified": shared_oci.UNIQUE_ID,
+        "contentType": "Image",
+        "parsedBy": "OCI Vision",
+        "creationDate": shared_oci.UNIQUE_ID,
+        "content": concat_imageText + " " + concat_labels,
+        "path": resourceId,
+        "other1": concat_labels
+    }
+    log( "</vision>")
+    return result    
+
+## -- belgian --------------------------------------------------------------
+
+def belgian(value):
+    log( "<belgian>")
+    namespace = value["data"]["additionalDetails"]["namespace"]
+    bucketName = value["data"]["additionalDetails"]["bucketName"]
+    resourceName = value["data"]["resourceName"]
+    compartmentId = value["data"]["compartmentId"]
+    resourceId = value["data"]["resourceId"]
+
+    vision_client = oci.ai_vision.AIServiceVisionClient(config = {}, signer=signer)
+    job = {
+        "compartmentId": compartmentId,
+        "image": {
+            "source": "OBJECT_STORAGE",
+            "bucketName": bucketName,
+            "namespaceName": namespace,
+            "objectName": resourceName
+        },
+        "features": [
+            {
+                    "featureType": "IMAGE_CLASSIFICATION",
+                    "maxResults": 5
+            },
+            {
+                    "featureType": "TEXT_DETECTION"
+            }
+        ]
+    }
+    resp = vision_client.analyze_image(job)
+    log(resp.data)
+    # log(json.dumps(resp,sort_keys=True, indent=4))
+
+    name = resp.data.image_text.lines[8]
+    id = resp.data.image_text.lines[19]
+    birthdate = resp.data.image_text.lines[22]
+
+    result = {
+        "filename": resourceName,
+        "date": shared_oci.UNIQUE_ID,
+        "modified": shared_oci.UNIQUE_ID,
+        "contentType": "Belgian ID",
+        "parsedBy": "OCI Vision",
+        "creationDate": shared_oci.UNIQUE_ID,
+        "content": "Belgian identity card. Name="+name,
+        "path": resourceId,
+        "other1": id,
+        "other2": birthdate,
+    }
+    log( "</belgian>")
+    return result  
+
+## -- speech --------------------------------------------------------------
+
+def speech(value):
+    log( "<speech>")
+    namespace = value["data"]["additionalDetails"]["namespace"]
+    bucketName = value["data"]["additionalDetails"]["bucketName"]
+    resourceName = value["data"]["resourceName"]
+    compartmentId = value["data"]["compartmentId"]
+
+    speech_client = oci.ai_speech.AIServiceSpeechClient(config = {}, signer=signer)
+    job = {
+        "normalization": {
+                "isPunctuationEnabled": True
+        },
+        "compartmentId": compartmentId,
+        "displayName": shared_oci.UNIQUE_ID,
+        "modelDetails": {
+                "domain": "GENERIC",
+                "languageCode": "en-US"
+        },
+        "inputLocation": {
+                "locationType": "OBJECT_LIST_INLINE_INPUT_LOCATION",
+                "objectLocations": [
+                    {
+                            "namespaceName": namespace,
+                            "bucketName": bucketName,
+                            "objectNames": [
+                                resourceName
+                            ]
+                    }
+                ]
+        },
+        "outputLocation": {
+                "namespaceName": namespace,
+                "bucketName": bucketName,
+                "prefix": "speech"
+        },
+        "additionalTranscriptionFormats": [
+                "SRT"
+        ]
+    }
+    resp = speech_client.create_transcription_job(job)
+    log_in_file("speech_resp",str(resp.data))
+    log( "</speech>")
+
+## -- documentUnderstanding -------------------------------------------------
+
+def documentUnderstanding(value):
+    log( "<documentUnderstanding>")
+    namespace = value["data"]["additionalDetails"]["namespace"]
+    bucketName = value["data"]["additionalDetails"]["bucketName"]
+    resourceName = value["data"]["resourceName"]
+    compartmentId = value["data"]["compartmentId"]
+
+    document_understanding_client = oci.ai_document.AIServiceDocumentClient(config = {}, signer=signer)
+    job = {
+        "processorConfig": {
+            "language": "ENG",
+            "processorType": "GENERAL",
+            "features": [
+                {
+                    "featureType": "TEXT_EXTRACTION"
+                }
+            ],
+            "isZipOutputEnabled": False
+        },
+        "compartmentId": compartmentId,
+        "inputLocation": {
+            "sourceType": "OBJECT_STORAGE_LOCATIONS",
+            "objectLocations": [
+                {
+                    "bucketName": bucketName,
+                    "namespaceName": namespace,
+                    "objectName": resourceName
+                }
+            ]
+        },
+        "outputLocation": {
+            "namespaceName": namespace,
+            "bucketName": bucketName,
+            "prefix": "document"
+        }
+    }
+    resp = document_understanding_client.create_processor_job(job)
+    log_in_file("documentUnderstanding_resp",str(resp.data))
+    log( "</documentUnderstanding>")
+
+## -- decodeJson ------------------------------------------------------------------
+
+def decodeJson(value):
+    log( "<decodeJson>")
+    global signer
+    fnOcid = os.getenv('FN_OCID')
+    fnInvokeEndpoint = os.getenv('FN_INVOKE_ENDPOINT')
+    namespace = value["data"]["additionalDetails"]["namespace"]
+    bucketName = value["data"]["additionalDetails"]["bucketName"]
+    resourceName = value["data"]["resourceName"]
+    resourceId = value["data"]["resourceId"]
+    
+    # Read the JSON file from the object storage
+    os_client = oci.object_storage.ObjectStorageClient(config = {}, signer=signer)
+    resp = os_client.get_object(namespace_name=namespace, bucket_name=bucketName, object_name=resourceName)
+    file_name = shared_oci.LOG_DIR+"/"+shared_oci.UNIQUE_ID+".json"
+    with open(file_name, 'wb') as f:
+        for chunk in resp.data.raw.stream(1024 * 1024, decode_content=False):
+            f.write(chunk)
+
+    with open(file_name, 'r') as f:
+        file_content = f.read()
+    log("Read file from object storage: "+ file_name)
+    j = json.loads(file_content)   
+
+    if resourceName[:resourceName.index("/")] == "document":
+        # DocUnderstanding
+        concat_text = ""
+        pages = []
+        for p in j.get("pages"):
+            page = ""
+            for l in p.get("lines"):
+                page += l.get("text") + "\n"
+            pages.append(page)
+            concat_text += page + " "    
+        original_resourcename = resourceName[:resourceName.index(".json")][resourceName.index("/results/")+9:]
+        result = {
+            "filename": original_resourcename,
+            "date": shared_oci.UNIQUE_ID,
+            "applicationName": "OCI Document Understanding",
+            "modified": shared_oci.UNIQUE_ID,
+            "contentType": j["documentMetadata"]["mimeType"],
+            "creationDate": shared_oci.UNIQUE_ID,
+            "content": concat_text,
+            "pages": pages,
+            "path": original_resourcename
+        }
+    else:
+        # Speech
+        original_resourcename = resourceName[:resourceName.index(".json")][resourceName.index("_"):]
+        original_resourceid = "/n/" + namespace + "/b/" + bucketName + "/o/" + original_resourcename
+        result = {
+            "filename": original_resourcename,
+            "date": shared_oci.UNIQUE_ID,
+            "applicationName": "OCI Speech",
+            "modified": shared_oci.UNIQUE_ID,
+            "contentType": j["audioFormatDetails"]["format"],
+            "creationDate": shared_oci.UNIQUE_ID,
+            "content": j["transcriptions"][0]["transcription"],
+            "path": original_resourceid
+        }
+    log( "</decodeJson>")
+    return result
