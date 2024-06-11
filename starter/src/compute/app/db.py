@@ -242,7 +242,7 @@ def decodeJson(value):
                 page += l.get("text") + "\n"
             pages.append(page)
             concat_text += page + " "    
-        original_resourcename = resourceName[:resourceName.index(".json")][resourceName.index("/results/"+9):]
+        original_resourcename = resourceName[:resourceName.index(".json")][resourceName.index("/results/")+9:]
         result = {
             "filename": original_resourcename,
             "date": search_shared.UNIQUE_ID,
