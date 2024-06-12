@@ -4,4 +4,4 @@ cd $SCRIPT_DIR
 
 . ./env.sh
 
-python3.9 objectStorage2DB.py 2>&1 | tee objectStorage2DB.log
+python3.9 index.py 2>&1 | tee index.log
