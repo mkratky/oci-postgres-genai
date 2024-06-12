@@ -2,10 +2,15 @@
 import os
 import json 
 import requests
+import oci
 
 # Constant
 LOG_DIR = '/tmp/app_log'
 UNIQUE_ID = "ID"
+
+# Signer
+signer = oci.auth.signers.InstancePrincipalsSecurityTokenSigner()
+config = {'region': signer.region, 'tenancy': signer.tenancy_id}
 
 # Create Log directory
 if os.path.isdir(LOG_DIR) == False:
@@ -50,7 +55,8 @@ def dictInt(d,key):
 ## -- embedText ------------------------------------------------------
 
 #XXXXX Ideally all vector should be created in one call
-def embedText(c,signer):
+def embedText(c):
+    global signer
     log( "<embedText>")
     compartmentId = os.getenv("TF_VAR_compartment_ocid")
     endpoint = 'https://inference.generativeai.us-chicago-1.oci.oraclecloud.com/20231130/actions/embedText'
@@ -74,14 +80,17 @@ def embedText(c,signer):
 
 ## -- generateText ------------------------------------------------------
 
-def generateText(prompt,signer):
+def generateText(prompt):
+    global signer
     log( "<generateText>")
     compartmentId = os.getenv("TF_VAR_compartment_ocid")
     endpoint = 'https://inference.generativeai.us-chicago-1.oci.oraclecloud.com/20231130/actions/generateText'
+    #         "modelId": "ocid1.generativeaimodel.oc1.us-chicago-1.amaaaaaask7dceyafhwal37hxwylnpbcncidimbwteff4xha77n5xz4m7p6a",
+    #         "modelId": "cohere.command-r-16k",
     body = {
         "compartmentId": compartmentId,
         "servingMode": {
-            "modelId": "cohere.command-r-16k",
+            "modelId": "ocid1.generativeaimodel.oc1.us-chicago-1.amaaaaaask7dceyafhwal37hxwylnpbcncidimbwteff4xha77n5xz4m7p6a",
             "servingType": "ON_DEMAND"
         },
         "inferenceRequest": {
@@ -107,11 +116,54 @@ def generateText(prompt,signer):
     log( "</generateText>")
     return s
 
+## -- chat ------------------------------------------------------
+
+def chat(prompt):
+    global signer
+    log( "<chat>")
+    compartmentId = os.getenv("TF_VAR_compartment_ocid")
+    endpoint = 'https://inference.generativeai.us-chicago-1.oci.oraclecloud.com/20231130/actions/chat'
+    #         "modelId": "ocid1.generativeaimodel.oc1.us-chicago-1.amaaaaaask7dceyafhwal37hxwylnpbcncidimbwteff4xha77n5xz4m7p6a",
+    #         "modelId": "cohere.command-r-16k",
+    body = { 
+        "compartmentId": compartmentId,
+        "servingMode": {
+            "modelId": "cohere.command-r-16k",
+            "servingType": "ON_DEMAND"
+        },
+        "chatRequest": {
+            "maxTokens": 600,
+            "temperature": 0,
+            "preambleOverride": "",
+            "frequencyPenalty": 0,
+            "presencePenalty": 0,
+            "topP": 0.75,
+            "topK": 0,
+            "isStream": False,
+            "chatHistory": [],
+            "message": prompt,
+            "apiFormat": "COHERE"
+        }
+    }
+    resp = requests.post(endpoint, json=body, auth=signer)
+    resp.raise_for_status()
+    log(resp)    
+    # Binary string conversion to utf8
+    log_in_file("chat_resp", resp.content.decode('utf-8'))
+    j = json.loads(resp.content)   
+    s = j["chatResponse"]["text"]
+    if s.startswith('```json'):
+        start_index = s.find("{") 
+        end_index = s.rfind("}")+1
+        s = s[start_index:end_index]
+    log( "</chat>")
+    return s
+
 ## -- invokeTika ------------------------------------------------------------------
 
 def invokeTika(value):
-    log( "<invokeTika>")
     global signer
+    log( "<invokeTika>")
     fnOcid = os.getenv('FN_OCID')
     fnInvokeEndpoint = os.getenv('FN_INVOKE_ENDPOINT')
     namespace = value["data"]["additionalDetails"]["namespace"]
@@ -128,12 +180,12 @@ def invokeTika(value):
     j = json.loads(resp.data.text)
     result = {
         "filename": resourceName,
-        "date": shared_oci.UNIQUE_ID,
+        "date": UNIQUE_ID,
         "applicationName": "Tika Parser",
-        "modified": shared_oci.UNIQUE_ID,
+        "modified": UNIQUE_ID,
         "contentType": dictString(j,"Content-Type"),
         "parsedBy": dictString(j,"X-Parsed-By"),
-        "creationDate": shared_oci.UNIQUE_ID,
+        "creationDate": UNIQUE_ID,
         "author": dictString(j,"Author"),
         "publisher": dictString(j,"publisher"),
         "content": j["content"],
@@ -214,11 +266,11 @@ def vision(value):
 
     result = {
         "filename": resourceName,
-        "date": shared_oci.UNIQUE_ID,
-        "modified": shared_oci.UNIQUE_ID,
+        "date": UNIQUE_ID,
+        "modified": UNIQUE_ID,
         "contentType": "Image",
         "parsedBy": "OCI Vision",
-        "creationDate": shared_oci.UNIQUE_ID,
+        "creationDate": UNIQUE_ID,
         "content": concat_imageText + " " + concat_labels,
         "path": resourceId,
         "other1": concat_labels
@@ -265,11 +317,11 @@ def belgian(value):
 
     result = {
         "filename": resourceName,
-        "date": shared_oci.UNIQUE_ID,
-        "modified": shared_oci.UNIQUE_ID,
+        "date": UNIQUE_ID,
+        "modified": UNIQUE_ID,
         "contentType": "Belgian ID",
         "parsedBy": "OCI Vision",
-        "creationDate": shared_oci.UNIQUE_ID,
+        "creationDate": UNIQUE_ID,
         "content": "Belgian identity card. Name="+name,
         "path": resourceId,
         "other1": id,
@@ -293,7 +345,7 @@ def speech(value):
                 "isPunctuationEnabled": True
         },
         "compartmentId": compartmentId,
-        "displayName": shared_oci.UNIQUE_ID,
+        "displayName": UNIQUE_ID,
         "modelDetails": {
                 "domain": "GENERIC",
                 "languageCode": "en-US"
@@ -380,7 +432,7 @@ def decodeJson(value):
     # Read the JSON file from the object storage
     os_client = oci.object_storage.ObjectStorageClient(config = {}, signer=signer)
     resp = os_client.get_object(namespace_name=namespace, bucket_name=bucketName, object_name=resourceName)
-    file_name = shared_oci.LOG_DIR+"/"+shared_oci.UNIQUE_ID+".json"
+    file_name = LOG_DIR+"/"+UNIQUE_ID+".json"
     with open(file_name, 'wb') as f:
         for chunk in resp.data.raw.stream(1024 * 1024, decode_content=False):
             f.write(chunk)
@@ -403,11 +455,11 @@ def decodeJson(value):
         original_resourcename = resourceName[:resourceName.index(".json")][resourceName.index("/results/")+9:]
         result = {
             "filename": original_resourcename,
-            "date": shared_oci.UNIQUE_ID,
+            "date": UNIQUE_ID,
             "applicationName": "OCI Document Understanding",
-            "modified": shared_oci.UNIQUE_ID,
+            "modified": UNIQUE_ID,
             "contentType": j["documentMetadata"]["mimeType"],
-            "creationDate": shared_oci.UNIQUE_ID,
+            "creationDate": UNIQUE_ID,
             "content": concat_text,
             "pages": pages,
             "path": original_resourcename
@@ -418,11 +470,11 @@ def decodeJson(value):
         original_resourceid = "/n/" + namespace + "/b/" + bucketName + "/o/" + original_resourcename
         result = {
             "filename": original_resourcename,
-            "date": shared_oci.UNIQUE_ID,
+            "date": UNIQUE_ID,
             "applicationName": "OCI Speech",
-            "modified": shared_oci.UNIQUE_ID,
+            "modified": UNIQUE_ID,
             "contentType": j["audioFormatDetails"]["format"],
-            "creationDate": shared_oci.UNIQUE_ID,
+            "creationDate": UNIQUE_ID,
             "content": j["transcriptions"][0]["transcription"],
             "path": original_resourceid
         }

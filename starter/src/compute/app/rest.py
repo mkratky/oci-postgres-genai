@@ -10,13 +10,9 @@ import oci
 app = Flask(__name__)
 CORS(app)
 
-# OCI
-signer = oci.auth.signers.InstancePrincipalsSecurityTokenSigner()
-config = {'region': signer.region, 'tenancy': signer.tenancy_id}
 
 @app.route('/query', methods=['GET','POST'])
 def query():
-    global signer
     a = []
     if request.method=='POST':
         type = request.json.get('type')
@@ -29,7 +25,7 @@ def query():
     log( "question: " + str(question))
     try:
         shared_db.initDbConn()
-        embed = shared_oci.embedText(question, signer)
+        embed = shared_oci.embedText(question)
         a = shared_db.queryDb( type, question, embed) 
     finally:
         shared_db.closeDbConn()
@@ -40,12 +36,11 @@ def query():
 
 @app.route('/generate', methods=['GET','POST'])
 def generate():
-    global signer
     if request.method=='POST':
         prompt = request.json.get('prompt')
     else:
         prompt = request.args.get('prompt')
-    result = shared_oci.generateText( prompt, signer )  
+    result = shared_oci.generateText( prompt )  
     log("Result="+str(result))  
     return str(result)   
 

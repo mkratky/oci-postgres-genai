@@ -4,12 +4,10 @@ import os
 import json 
 import time
 import pathlib
-import requests
 import traceback
 import shared_oci
 from shared_oci import log
 from shared_oci import log_in_file
-from shared_oci import dictString
 import shared_db
 
 from datetime import datetime
@@ -117,7 +115,7 @@ def stream_loop(client, stream_id, initial_cursor):
                 eventDocument(value)
             except:
                 log("Exception: stream_loop") 
-                print(traceback.format_exc())
+                log(traceback.format_exc())
             
         # get_messages is a throttled method; clients should retrieve sufficiently large message
         # batches, as to avoid too many http requests.
@@ -172,7 +170,7 @@ def insertDocument(value):
         # Ignore
         return
     else:
-        result = invokeTika(value)
+        result = shared_oci.invokeTika(value)
 
     log_in_file("content", result["content"])
     if len(result["content"])==0:
@@ -195,7 +193,7 @@ def insertDocument(value):
         # Get Next Chunks
         chuncks = cutInChunks( p )
         for c in chuncks:
-            result["cohereEmbed"] = shared_oci.embedText(c,signer)
+            result["cohereEmbed"] = shared_oci.embedText(c)
             shared_db.insertDb(result,c)
                 
 ## -- deleteDocument --------------------------------------------------------
@@ -208,15 +206,11 @@ def deleteDocument(value):
 
 ## -- main ------------------------------------------------------------------
 
-# get signer from instance principals token
 ociMessageEndpoint = os.getenv('STREAM_MESSAGE_ENDPOINT')
 ociStreamOcid = os.getenv('STREAM_OCID')
 
-# Instance Principal
-signer = oci.auth.signers.InstancePrincipalsSecurityTokenSigner()
-config = {'region': signer.region, 'tenancy': signer.tenancy_id}
 # stream_client = oci.streaming.StreamClient(config, service_endpoint=ociMessageEndpoint)
-stream_client = oci.streaming.StreamClient(config = {}, service_endpoint=ociMessageEndpoint, signer=signer)
+stream_client = oci.streaming.StreamClient(config = {}, service_endpoint=ociMessageEndpoint, signer=shared_oci.signer)
 
 # A cursor can be created as part of a consumer group.
 # Committed offsets are managed for the group, and partitions

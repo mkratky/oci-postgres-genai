@@ -2,6 +2,8 @@
 import os
 import psycopg2
 from shared_oci import log
+from shared_oci import dictString
+from shared_oci import dictInt
 
 # Connection
 dbConn = None
