@@ -58,9 +58,9 @@ def insertDb(result,c):
     ]
     try:
         cur.executemany(stmt, data)
-        print(f"Successfully inserted {cur.rowcount} records.")
+        log(f"Successfully inserted {cur.rowcount} records.")
     except (Exception, psycopg2.Error) as error:
-        print(f"Error inserting records: {error}")
+        log(f"Error inserting records: {error}")
     finally:
         # Close the cursor and connection
         if cur:
@@ -72,9 +72,10 @@ def deleteDb(path):
     global dbConn
     cur = dbConn.cursor()
     stmt = "delete from oic where path=%s"
+    log(f">deleteDb> path={path}")
     try:
         cur.execute(stmt, (path,))
-        print(f"<deleteDb> Successfully deleted")
+        print(f"<deleteDb> Successfully {cur.rowcount} deleted")
     except (Exception, psycopg2.Error) as error:
         print(f"<deleteDb> Error deleting: {error}")
     finally:
@@ -94,8 +95,8 @@ def queryDb( type, question, embed ):
         """.format(question)
     elif type=="semantic":
         query = """
-        SELECT filename, path, content, content_type, region, page, summary, cohere_embed <=> '{0}' score FROM oic
-        ORDER BY score LIMIT 10
+        SELECT filename, path, content, content_type, region, page, summary, 1 score FROM oic
+        ORDER BY cohere_embed <=> '{0}' LIMIT 10
         """.format(embed)
     elif type in ["hybrid","rag"]:
         query = """

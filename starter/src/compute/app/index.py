@@ -182,8 +182,7 @@ def insertDocument(value):
         result["summary"] = shared_oci.summarizeContent(value, result["content"])
     
     # Delete Document in repository
-    if value["eventType"] == "com.oraclecloud.objectstorage.updateobject":
-        deleteDocument( value )
+    deleteDocument( value )
 
     # If no page, just add the content
     if result.get("pages") == None:
