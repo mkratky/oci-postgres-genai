@@ -75,7 +75,7 @@ def deleteDb(path):
     cur = dbConn.cursor()
     stmt = "delete from oic where path=:1"
     try:
-        cur.execute(stmt, path)
+        cur.execute(stmt, (path,))
         print(f"<deleteDb> Successfully deleted")
     except (Exception) as error:
         print(f"<deleteDb> Error deleting: {error}")

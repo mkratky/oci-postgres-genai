@@ -86,12 +86,17 @@ def deleteDb(path):
 # -- queryDb ----------------------------------------------------------------------
 
 def queryDb( type, question, embed ):
-    query = "SELECT filename, path, content, content_type, region, page, summary FROM oic"
     if type=="search":
         # Text search example
-        query += " WHERE to_tsvector(content) @@ plainto_tsquery('{0}') order ts_rank_cd(to_tsvector(content), plainto_tsquery('{0}'))".format(question)
+        query = """
+        SELECT filename, path, content, content_type, region, page, summary, ts_rank_cd(to_tsvector(content), plainto_tsquery('{0}')) score FROM oic
+        WHERE to_tsvector(content) @@ plainto_tsquery('{0}') order by score LIMIT 10
+        """.format(question)
     elif type=="semantic":
-        query += " ORDER BY cohere_embed <=> '{0}' LIMIT 10;".format(embed)
+        query = """
+        SELECT filename, path, content, content_type, region, page, summary, cohere_embed <=> '{0}' score FROM oic
+        ORDER BY score LIMIT 10
+        """.format(embed)
     elif type in ["hybrid","rag"] :
         query = """
         WITH text_search AS (
@@ -104,13 +109,16 @@ def queryDb( type, question, embed ):
             FROM oic
         )
         SELECT o.filename, o.path, o.content, o.content_type, o.region, o.page, o.summary,
-            (0.3 * ts.text_rank + 0.7 * (1 - vs.vector_distance)) AS hybrid_score
+            (0.3 * ts.text_rank + 0.7 * (1 - vs.vector_distance)) AS score
         FROM oic o
-        FULL OUTER JOIN text_search ts ON o.id = ts.id
-        FULL OUTER JOIN vector_search vs ON o.id = vs.id
+        JOIN text_search ts ON o.id = ts.id
+        JOIN vector_search vs ON o.id = vs.id
         ORDER BY hybrid_score DESC
         LIMIT 10;
         """.format(question,embed)
+#        FULL OUTER JOIN text_search ts ON o.id = ts.id
+#        FULL OUTER JOIN vector_search vs ON o.id = vs.id
+
     else:
         log( "Not supported type " + type)
         return []
@@ -119,7 +127,7 @@ def queryDb( type, question, embed ):
     cursor.execute(query)
     deptRows = cursor.fetchall()
     for row in deptRows:
-        result.append( {"filename": row[0], "path": row[1], "content": row[2], "contentType": row[3], "region": row[4], "page": row[5], "summary": row[6]} )  
+        result.append( {"filename": row[0], "path": row[1], "content": row[2], "contentType": row[3], "region": row[4], "page": row[5], "summary": row[6], "score": row[7]} )  
     for r in result:
         log("filename="+r["filename"])
         log("content: "+r["content"][:150])

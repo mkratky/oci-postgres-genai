@@ -201,6 +201,11 @@ def summarizeContent(value,content):
     global signer
     compartmentId = value["data"]["compartmentId"]
     endpoint = 'https://inference.generativeai.us-chicago-1.oci.oraclecloud.com/20231130/actions/summarizeText'
+    # Avoid Limit of 4096 Tokens
+    if len(content) > 12000:
+        log( "Truncating to 12000 characters")
+        content = content[:12000]
+
     body = {
         "input" : content,
         "servingMode" : {
@@ -214,14 +219,20 @@ def summarizeContent(value,content):
         "additionalCommand" : "",
         "compartmentId" : compartmentId
     }
-    resp = requests.post(endpoint, json=body, auth=signer)
-    resp.raise_for_status()
-    log(resp)   
-    log_in_file("summarizeContent_resp",str(resp.content)) 
-    j = json.loads(resp.content)   
-    log( "</summarizeContent>")
-    return dictString(j,"summary") 
-
+    try: 
+        resp = requests.post(endpoint, json=body, auth=signer)
+        resp.raise_for_status()
+        log(resp)   
+        log_in_file("summarizeContent_resp",str(resp.content)) 
+        j = json.loads(resp.content)   
+        log( "</summarizeContent>")
+        return dictString(j,"summary") 
+    except requests.exceptions.HTTPError as err:
+        log("Exception: summarizeContent") 
+        log(err.response.status_code)
+        log(err.response.text)
+        return "-"
+    
 ## -- vision --------------------------------------------------------------
 
 def vision(value):
@@ -453,6 +464,7 @@ def decodeJson(value):
             pages.append(page)
             concat_text += page + " "    
         original_resourcename = resourceName[:resourceName.index(".json")][resourceName.index("/results/")+9:]
+        original_resourceid = "/n/" + namespace + "/b/" + bucketName + "/o/" + original_resourcename
         result = {
             "filename": original_resourcename,
             "date": UNIQUE_ID,
@@ -462,7 +474,7 @@ def decodeJson(value):
             "creationDate": UNIQUE_ID,
             "content": concat_text,
             "pages": pages,
-            "path": original_resourcename
+            "path": original_resourceid
         }
     else:
         # Speech
