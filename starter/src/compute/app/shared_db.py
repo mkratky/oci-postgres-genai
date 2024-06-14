@@ -90,14 +90,14 @@ def queryDb( type, question, embed ):
         # Text search example
         query = """
         SELECT filename, path, content, content_type, region, page, summary, ts_rank_cd(to_tsvector(content), plainto_tsquery('{0}')) score FROM oic
-        WHERE to_tsvector(content) @@ plainto_tsquery('{0}') order by score LIMIT 10
+        WHERE to_tsvector(content) @@ plainto_tsquery('{0}') order by score DESC LIMIT 10
         """.format(question)
     elif type=="semantic":
         query = """
         SELECT filename, path, content, content_type, region, page, summary, cohere_embed <=> '{0}' score FROM oic
         ORDER BY score LIMIT 10
         """.format(embed)
-    elif type in ["hybrid","rag"] :
+    elif type in ["hybrid","rag"]:
         query = """
         WITH text_search AS (
             SELECT id, ts_rank_cd(to_tsvector(content), plainto_tsquery('{0}')) AS text_rank
@@ -113,7 +113,7 @@ def queryDb( type, question, embed ):
         FROM oic o
         JOIN text_search ts ON o.id = ts.id
         JOIN vector_search vs ON o.id = vs.id
-        ORDER BY hybrid_score DESC
+        ORDER BY score DESC
         LIMIT 10;
         """.format(question,embed)
 #        FULL OUTER JOIN text_search ts ON o.id = ts.id
