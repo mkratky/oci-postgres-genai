@@ -13,6 +13,8 @@ dbConn = None
 
 def initDbConn():
     global dbConn 
+    # Thick driver...
+    oracledb.init_oracle_client()
     dbConn = oracledb.connect( user=os.getenv('DB_USER'), password=os.getenv('DB_PASSWORD'), dsn=os.getenv('DB_URL'))
     dbConn.autocommit = True
 
@@ -30,10 +32,10 @@ def insertDb(result,c):
     stmt = """
         INSERT INTO oic (
             application_name, author, translation, cohere_embed, content, content_type,
-            creation_date, date, modified, other1, other2, other3, parsed_by,
+            creation_date, modified, other1, other2, other3, parsed_by,
             filename, path, publisher, region, summary, page
         )
-        VALUES (:1, :2, :3, :4, :5, :6, :7, :8, :9, :10, :11, :12, :13, :14, :15, :16, :17, :18, :19)
+        VALUES (:1, :2, :3, :4, :5, :6, :7, :8, :9, :10, :11, :12, :13, :14, :15, :16, :17, :18)
     """
     data = [
         (dictString(result,"applicationName"), 
@@ -43,7 +45,6 @@ def insertDb(result,c):
             c,
             dictString(result,"contentType"),
             dictString(result,"creationDate"),
-            dictString(result,"date"),
             dictString(result,"modified"),
             dictString(result,"other1"),
             dictString(result,"other2"),
@@ -60,7 +61,7 @@ def insertDb(result,c):
     try:
         cur.executemany(stmt, data)
         print(f"Successfully inserted {cur.rowcount} records.")
-    except (Exception, psycopg2.Error) as error:
+    except (Exception) as error:
         print(f"Error inserting records: {error}")
     finally:
         # Close the cursor and connection
@@ -72,11 +73,11 @@ def insertDb(result,c):
 def deleteDb(path):  
     global dbConn
     cur = dbConn.cursor()
-    stmt = "delete from oic where path=%s"
+    stmt = "delete from oic where path=:1"
     try:
-        cur.execute(stmt, (path,))
+        cur.execute(stmt, path)
         print(f"<deleteDb> Successfully deleted")
-    except (Exception, psycopg2.Error) as error:
+    except (Exception) as error:
         print(f"<deleteDb> Error deleting: {error}")
     finally:
         # Close the cursor and connection

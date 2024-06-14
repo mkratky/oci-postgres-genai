@@ -64,7 +64,7 @@ def embedText(c):
         "inputs" : [ c ],
         "servingMode" : {
             "servingType" : "ON_DEMAND",
-            "modelId" : "cohere.embed-english-light-v2.0"
+            "modelId" : "cohere.embed-multilingual-v3.0"
         },
         "truncate" : "START",
         "compartmentId" : compartmentId

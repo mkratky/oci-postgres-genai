@@ -89,7 +89,7 @@ def queryDb( type, question, embed ):
     query = "SELECT filename, path, content, content_type, region, page, summary FROM oic"
     if type=="search":
         # Text search example
-        query += " WHERE content ILIKE '%{0}%'".format(question)
+        query += " WHERE to_tsvector(content) @@ plainto_tsquery('{0}') order ts_rank_cd(to_tsvector(content), plainto_tsquery('{0}'))".format(question)
     elif type=="semantic":
         query += " ORDER BY cohere_embed <=> '{0}' LIMIT 10;".format(embed)
     elif type in ["hybrid","rag"] :
@@ -106,8 +106,8 @@ def queryDb( type, question, embed ):
         SELECT o.filename, o.path, o.content, o.content_type, o.region, o.page, o.summary,
             (0.3 * ts.text_rank + 0.7 * (1 - vs.vector_distance)) AS hybrid_score
         FROM oic o
-        JOIN text_search ts ON o.id = ts.id
-        JOIN vector_search vs ON o.id = vs.id
+        FULL OUTER JOIN text_search ts ON o.id = ts.id
+        FULL OUTER JOIN vector_search vs ON o.id = vs.id
         ORDER BY hybrid_score DESC
         LIMIT 10;
         """.format(question,embed)
