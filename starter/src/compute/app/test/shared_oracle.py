@@ -74,16 +74,16 @@ def deleteDb(path):
     global dbConn
     cur = dbConn.cursor()
     stmt = "delete from oic where path=:1"
+    log(f">deleteDb> path={path}")
     try:
         cur.execute(stmt, (path,))
-        print(f"<deleteDb> Successfully deleted")
+        print(f"<deleteDb> Successfully {cur.rowcount} deleted")
     except (Exception) as error:
         print(f"<deleteDb> Error deleting: {error}")
     finally:
         # Close the cursor and connection
         if cur:
             cur.close()
-
 
 # -- queryDb ----------------------------------------------------------------------
 
