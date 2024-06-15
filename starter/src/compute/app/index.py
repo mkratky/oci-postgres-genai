@@ -51,9 +51,9 @@ def cutInChunks(text):
             elif last_bad_separator > 0:
                chunck_end = last_bad_separator
             if text[chunck_end] in [ "[", "(" ]:
-                i -=1
-                chunck_end -=1
-            chunck = text[chunck_start:chunck_end]
+                chunck = text[chunck_start:chunck_end-1]
+            else:     
+                chunck = text[chunck_start:chunck_end]
             log("chunck_start= " + str(chunck_start) + " - " + chunck)   
             result.append( chunck )
             chunck_start=chunck_end 
@@ -99,7 +99,7 @@ def stream_loop(client, stream_id, initial_cursor):
             return
 
         # Process the messages
-        log(" Read {} messages".format(len(get_response.data)))
+        log("<stream_loop> Read {} messages".format(len(get_response.data)))
         for message in get_response.data:
             try:
                 log("--------------------------------------------------------------" )
@@ -116,6 +116,7 @@ def stream_loop(client, stream_id, initial_cursor):
             except:
                 log("Exception: stream_loop") 
                 log(traceback.format_exc())
+        log("<stream_loop> Processed {} messages".format(len(get_response.data)))        
             
         # get_messages is a throttled method; clients should retrieve sufficiently large message
         # batches, as to avoid too many http requests.
@@ -182,7 +183,7 @@ def insertDocument(value):
         result["summary"] = shared_oci.summarizeContent(value, result["content"])
     
     # Delete Document in repository
-    deleteDocument( value )
+    deleteDocument( result["path"] )
 
     # If no page, just add the content
     if result.get("pages") == None:
@@ -197,10 +198,9 @@ def insertDocument(value):
                 
 ## -- deleteDocument --------------------------------------------------------
 
-def deleteDocument(value):
+def deleteDocument(path):
     log( "<deleteDocument>")
-    resourceId = value["data"]["path"]
-    shared_db.deleteDb(resourceId)
+    shared_db.deleteDb(path)
     log( "</deleteDocument>")
 
 ## -- main ------------------------------------------------------------------
