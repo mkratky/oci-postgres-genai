@@ -199,7 +199,7 @@ def insertDocument(value):
 
 def deleteDocument(value):
     log( "<deleteDocument>")
-    resourceId = value["data"]["resourceId"]
+    resourceId = value["data"]["path"]
     shared_db.deleteDb(resourceId)
     log( "</deleteDocument>")
 
