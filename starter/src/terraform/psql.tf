@@ -12,7 +12,9 @@ resource "oci_psql_db_system" "starter_psql" {
   }
   shape = "PostgreSQL.VM.Standard.E4.Flex.2.32GB"
   storage_details {
-    is_regionally_durable = true
+    # is_regionally_durable = false # For Frankfurt
+    is_regionally_durable = false
+    availability_domain = data.oci_identity_availability_domain.ad.name
     system_type = "OCI_OPTIMIZED_STORAGE"
   }
   credentials {

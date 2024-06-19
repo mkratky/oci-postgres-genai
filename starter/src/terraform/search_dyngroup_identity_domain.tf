@@ -13,6 +13,7 @@ locals {
 
 resource "oci_identity_domains_dynamic_resource_group" "search-fn-dyngroup" {
     #Required
+    provider       = oci.home    
     display_name = "${var.prefix}-fn-dyngroup"
     idcs_endpoint = local.idcs_url
     matching_rule = "ALL {resource.type = 'fnfunc', resource.compartment.id = '${var.compartment_ocid}'}"
@@ -21,6 +22,7 @@ resource "oci_identity_domains_dynamic_resource_group" "search-fn-dyngroup" {
 
 resource "oci_identity_domains_dynamic_resource_group" "search-bastion-dyngroup" {
     #Required
+    provider       = oci.home    
     display_name = "${var.prefix}-bastion-dyngroup"
     idcs_endpoint = local.idcs_url
     matching_rule = "ALL {instance.id = '${oci_core_instance.starter_bastion.id}'}"
@@ -33,18 +35,19 @@ resource "time_sleep" "wait_30_seconds" {
 }
 
 resource "oci_identity_policy" "starter_search_policy" {
-  depends_on = [ time_sleep.wait_30_seconds ]
-  name           = "${var.prefix}-policy"
-  description    = "${var.prefix} policy"
-  compartment_id = local.lz_appdev_cmp_ocid
+    provider       = oci.home    
+    depends_on     = [ time_sleep.wait_30_seconds ]
+    name           = "${var.prefix}-policy"
+    description    = "${var.prefix} policy"
+    compartment_id = local.lz_appdev_cmp_ocid
 
-  statements = [
-    "Allow dynamic-group ${var.prefix}-fn-dyngroup to manage objects in compartment id ${var.compartment_ocid}",
-    "Allow dynamic-group ${var.prefix}-bastion-dyngroup to manage all-resources in compartment id ${var.compartment_ocid}",
-    "Allow dynamic-group ${var.prefix}-bastion-dyngroup to manage stream-family in compartment id ${var.compartment_ocid}"
-    # "Allow dynamic-group ${var.idcs_domain_name}/${var.prefix}-fn-dyngroup to manage objects in compartment id ${var.compartment_ocid}",
-    # "Allow dynamic-group ${var.idcs_domain_name}/${var.prefix}-bastion-dyngroup to manage all-resources in compartment id ${var.compartment_ocid}",
-    # "Allow dynamic-group ${var.idcs_domain_name}/${var.prefix}-bastion-dyngroup to manage stream-family in compartment id ${var.compartment_ocid}"
-  ]
+    statements = [
+        "Allow dynamic-group ${var.prefix}-fn-dyngroup to manage objects in compartment id ${var.compartment_ocid}",
+        "Allow dynamic-group ${var.prefix}-bastion-dyngroup to manage all-resources in compartment id ${var.compartment_ocid}",
+        "Allow dynamic-group ${var.prefix}-bastion-dyngroup to manage stream-family in compartment id ${var.compartment_ocid}"
+        # "Allow dynamic-group ${var.idcs_domain_name}/${var.prefix}-fn-dyngroup to manage objects in compartment id ${var.compartment_ocid}",
+        # "Allow dynamic-group ${var.idcs_domain_name}/${var.prefix}-bastion-dyngroup to manage all-resources in compartment id ${var.compartment_ocid}",
+        # "Allow dynamic-group ${var.idcs_domain_name}/${var.prefix}-bastion-dyngroup to manage stream-family in compartment id ${var.compartment_ocid}"
+    ]
 }
 
