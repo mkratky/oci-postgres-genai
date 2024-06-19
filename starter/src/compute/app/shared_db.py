@@ -103,23 +103,22 @@ def queryDb( type, question, embed ):
         WITH text_search AS (
             SELECT id, ts_rank_cd(to_tsvector(content), plainto_tsquery('{0}')) AS text_rank
             FROM oic
-            WHERE to_tsvector(content) @@ plainto_tsquery('{0}')
+            WHERE to_tsvector(content) @@ plainto_tsquery('jazz')
         ),
         vector_search AS (
             SELECT id, cohere_embed <=> '{1}' AS vector_distance
             FROM oic
+        ),
+        text_vector AS (
+            SELECT COALESCE(ts.id,vs.id) id, (0.3 * COALESCE(ts.text_rank,0) + 0.7 * (1 - COALESCE(vs.vector_distance,1))) AS score FROM text_search ts
+            FULL OUTER JOIN vector_search vs ON vs.id = ts.id
         )
-        SELECT o.filename, o.path, o.content, o.content_type, o.region, o.page, o.summary,
-            (0.3 * ts.text_rank + 0.7 * (1 - vs.vector_distance)) AS score
+        SELECT o.filename, o.path, o.content, o.content_type, o.region, o.page, o.summary, tv.score AS score
         FROM oic o
-        JOIN text_search ts ON o.id = ts.id
-        JOIN vector_search vs ON o.id = vs.id
+        JOIN text_vector tv ON o.id = tv.id
         ORDER BY score DESC
         LIMIT 10;
         """.format(question,embed)
-#        FULL OUTER JOIN text_search ts ON o.id = ts.id
-#        FULL OUTER JOIN vector_search vs ON o.id = vs.id
-
     else:
         log( "Not supported type " + type)
         return []
