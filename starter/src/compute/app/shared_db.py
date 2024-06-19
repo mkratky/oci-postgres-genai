@@ -72,7 +72,7 @@ def deleteDb(path):
     global dbConn
     cur = dbConn.cursor()
     stmt = "delete from oic where path=%s"
-    log(f">deleteDb> path={path}")
+    log(f"<deleteDb> path={path}")
     try:
         cur.execute(stmt, (path,))
         print(f"<deleteDb> Successfully {cur.rowcount} deleted")
