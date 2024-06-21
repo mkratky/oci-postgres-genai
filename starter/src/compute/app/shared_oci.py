@@ -116,9 +116,74 @@ def generateText(prompt):
     log( "</generateText>")
     return s
 
+## -- llama ------------------------------------------------------
+
+def llama_chat(messages):
+    """
+            Messages format:
+            "messages": [
+            {
+                "role": "USER",
+                "content": [
+                    {
+                        "type": "TEXT",
+                        "text": "write a python code that counts from 1 to 20"
+                    }
+                ]
+            },
+            {
+                "role": "ASSISTANT",
+                "content": [
+                    {
+                        "type": "TEXT",
+                        "text": "Here is a simple Python code that counts from 1 to 20:\n```\nfor i in range(1, 21):\n    print(i)\n```\nExplanation:\n\n* `range(1, 21)` generates a sequence of numbers from 1 to 20 (inclusive).\n* The `for` loop iterates over this sequence, assigning each number to the variable `i`.\n* The `print(i)` statement prints the current value of `i` to the console.\n\nWhen you run this code, you should see the numbers 1 to 20 printed to the console, one per line.\n\nAlternatively, you can use a `while` loop to achieve the same result:\n```\ni = 1\nwhile i <= 20:\n    print(i)\n    i += 1\n```\nBut the `for` loop is generally more concise and Pythonic!"
+                    }
+                ]
+            }            
+    """
+    global signer
+    log( "<llama_chat>")
+    compartmentId = os.getenv("TF_VAR_compartment_ocid")
+    endpoint = 'https://inference.generativeai.us-chicago-1.oci.oraclecloud.com/20231130/actions/chat'
+    #         "modelId": "ocid1.generativeaimodel.oc1.us-chicago-1.amaaaaaask7dceyafhwal37hxwylnpbcncidimbwteff4xha77n5xz4m7p6a",
+    #         "modelId": "cohere.command-r-16k",
+    body = { 
+        "compartmentId": compartmentId,
+        "servingMode": {
+            "modelId": "meta.llama-3-70b-instruct",
+            "servingType": "ON_DEMAND"
+        },
+        "chatRequest": {
+            "maxTokens": 600,
+            "temperature": 0,
+            "preambleOverride": "",
+            "frequencyPenalty": 0,
+            "presencePenalty": 0,
+            "topP": 0.75,
+            "topK": 0,
+            "isStream": False,
+            "chatHistory": [],
+            "messages": messages,
+            "apiFormat": "GENERIC"
+        }
+    }
+    resp = requests.post(endpoint, json=body, auth=signer)
+    resp.raise_for_status()
+    log(resp)    
+    # Binary string conversion to utf8
+    log_in_file("llama_chat_resp", resp.content.decode('utf-8'))
+    j = json.loads(resp.content)   
+    s = j["chatResponse"]["text"]
+    if s.startswith('```json'):
+        start_index = s.find("{") 
+        end_index = s.rfind("}")+1
+        s = s[start_index:end_index]
+    log( "</llama_chat>")
+    return s
+
 ## -- chat ------------------------------------------------------
 
-def chat(prompt):
+def cohere_chat(prompt):
     global signer
     log( "<chat>")
     compartmentId = os.getenv("TF_VAR_compartment_ocid")

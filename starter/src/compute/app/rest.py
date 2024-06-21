@@ -10,7 +10,6 @@ import oci
 app = Flask(__name__)
 CORS(app)
 
-
 @app.route('/query', methods=['GET','POST'])
 def query():
     a = []
@@ -43,6 +42,16 @@ def generate():
     result = shared_oci.generateText( prompt )  
     log("Result="+str(result))  
     return str(result)   
+
+@app.route('/chat', methods=['GET','POST'])
+def chat():
+    if request.method=='POST':
+        prompt = request.json.get('messages')
+    else:
+        prompt = request.args.get('messages')
+    result = shared_oci.llama_chat( messages )  
+    log("Result="+str(result))  
+    return str(result)  
 
 @app.route('/info')
 def info():
