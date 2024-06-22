@@ -19,7 +19,7 @@ CREATE TABLE docs (
     content text,
     summary text,
     translation text,
-    summaryEmbed vector(1024),
+    summary_embed vector(1024),
 
     filename varchar(256),    
     path varchar(1024),    
