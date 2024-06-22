@@ -25,15 +25,14 @@ def closeDbConn():
 # -- createDoc -----------------------------------------------------------------
 
 def createDoc(result):  
+    result["summaryEmbed"] = shared_oci.embedText(result["summary"])        
+    insertDocs( result )
     for p in result["pages"]:
         # Get Next Chunks
         chuncks = shared_oci.cutInChunks( p )
         for c in chuncks:
             c["cohereEmbed"] = shared_oci.embedText(c["chunck"])
-            log( c )
             insertDocsChunck(result,c)
-    result["summaryEmbed"] = shared_oci.embedText(result["summary"])        
-    insertDocs( result )
 
 # -- insertDocs -----------------------------------------------------------------
 
