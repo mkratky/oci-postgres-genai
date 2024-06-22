@@ -67,7 +67,7 @@ def cohere_chat():
 
 @app.route('/info')
 def info():
-        return "Python - Flask - PSQL"          
+    return "Python - Flask - PSQL"          
 
 
 if __name__ == "__main__":
