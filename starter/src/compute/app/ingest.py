@@ -114,6 +114,8 @@ def insertDocument(value):
     # Summary 
     if len(result["content"])>250:
         result["summary"] = shared_oci.summarizeContent(value, result["content"])
+    else:    
+        result["summary"] = result["content"]
     
     # Delete Document in repository
     deleteDocument( result["path"] )

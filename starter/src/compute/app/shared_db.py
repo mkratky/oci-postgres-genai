@@ -25,10 +25,7 @@ def closeDbConn():
 # -- createDoc -----------------------------------------------------------------
 
 def createDoc(result):  
-    content = ""
     for p in result["pages"]:
-        # Concatenate the pages
-        content = content + p
         # Get Next Chunks
         chuncks = shared_oci.cutInChunks( p )
         for c in chuncks:
@@ -36,16 +33,16 @@ def createDoc(result):
             log( c )
             insertDocsChunck(result,c)
     result["summaryEmbed"] = shared_oci.embedText(result["summary"])        
-    insertDocs( result, content )
+    insertDocs( result )
 
 # -- insertDocs -----------------------------------------------------------------
 
-def insertDocs(result, content):  
+def insertDocs(result ):  
     global dbConn
     cur = dbConn.cursor()
     stmt = """
         INSERT INTO docs (
-            application_name, author, translation, cohere_embed, content, content_type,
+            application_name, author, translation, summary_embed, content, content_type,
             creation_date, modified, other1, other2, other3, parsed_by,
             filename, path, publisher, region, summary
         )
@@ -57,7 +54,7 @@ def insertDocs(result, content):
             dictString(result,"author"),
             dictString(result,"translation"),
             dictString(result,"summaryEmbed"),
-            content,
+            dictString(result,"content"),
             dictString(result,"contentType"),
             dictString(result,"creationDate"),
             dictString(result,"modified"),
