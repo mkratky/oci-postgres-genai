@@ -174,8 +174,8 @@ def queryDb( type, question, embed ):
     result = [] 
     cursor = dbConn.cursor()
     cursor.execute(query)
-    deptRows = cursor.fetchall()
-    for row in deptRows:
+    rows = cursor.fetchall()
+    for row in rows:
         result.append( {"filename": row[0], "path": row[1], "content": row[2], "contentType": row[3], "region": row[4], "page": row[5], "summary": row[6], "score": row[7]} )  
     for r in result:
         log("filename="+r["filename"])
@@ -188,11 +188,7 @@ def getDocByPath( path ):
     query = "SELECT filename, path, content, content_type, region, summary FROM docs WHERE path=%s"
     cursor = dbConn.cursor()
     cursor.execute(query,(path,))
-    deptRows = cursor.fetchall()
-    if len(deptRows)==1:
-        content = deptRows[0][2]
-        return content
-    else:
-        log( "<getDocByPath>Row returned: " + len(deptRows) )
-        return "-"
-    
+    rows = cursor.fetchall()
+    for row in rows:
+        return row[2]  
+    return "-"  
