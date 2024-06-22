@@ -52,6 +52,13 @@ def dictInt(d,key):
        return int(value)     
 
 
+## -- appendChunk -----------------------------------------------------------
+
+def appendChunck(result, text, char_start, char_end ):
+    chunck = text[char_start:char_end]
+    result.append( { "chunck": chunck, "char_start": char_start, "char_end": char_end } )
+    log("chunck (" + str(char_start) + "-" + str(char_end-1) + ") - " + chunck)      
+
 ## -- cutInChunks -----------------------------------------------------------
 
 def cutInChunks(text):
@@ -87,37 +94,33 @@ def cutInChunks(text):
                char_end = last_medium_separator
             elif last_bad_separator > 0:
                char_end = last_bad_separator
+            # XXXX
             if text[char_end] in [ "[", "(" ]:
-                chunck = text[char_start:char_end-1]
-                result.append( { chunck: chunck, char_start: char_start, char_end: char_end-1 } )
+                appendChunck( result, text, char_start, char_end )
             else:     
-                chunck = text[char_start:char_end]
-                result.append( { chunck: chunck, char_start: char_start, char_end: char_end } )
-            log("char_start= " + str(char_start) + " - " + chunck)   
+                appendChunck( result, text, char_start, char_end )
             char_start=char_end 
             last_good_separator = 0
             last_medium_separator = 0
             last_bad_separator = 0
     # Last chunck
-    chunck = text[char_start:]
-    log("char_start= " + str(char_start) + " - " + chunck)  
-    result.append( { chunck: chunck, char_start: char_start, char_end: len(text) } )
+    appendChunck( result, text, char_start, len(text) )
 
     # Overlapping chuncks
     if len(result)==1:
         return result
     else: 
-        result2 = [];
+        result2 = []
         previous = None
         for c in result:
             if previous!=None:
-                result2.append( { chunck: previous.chunck+c.chunck, start: previous.start, end: c.end } )
+                result2.append( { "chunck": previous["chunck"]+c["chunck"], "char_start": previous["char_start"], "char_end": c["char_end"] } )
             previous = c 
         return result2
 
 ## -- embedText ------------------------------------------------------
 
-#XXXXX Ideally all vector should be created in one call
+# Ideally all vectors should be created in one call
 def embedText(c):
     global signer
     log( "<embedText>")

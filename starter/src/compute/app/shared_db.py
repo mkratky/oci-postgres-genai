@@ -32,6 +32,7 @@ def createDoc(result):
         # Get Next Chunks
         chuncks = shared_oci.cutInChunks( p )
         for c in chuncks:
+            log( c )
             c["cohereEmbed"] = shared_oci.embedText(c["chunck"])
             insertDocsChunck(result,c)
     insertDocs( result, content )
