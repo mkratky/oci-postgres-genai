@@ -24,9 +24,9 @@ def closeDbConn():
     global dbConn 
     dbConn.close()
 
-# -- insertDoc -----------------------------------------------------------------
+# -- createDoc -----------------------------------------------------------------
 
-def insertDoc(result,c):  
+def createDoc(result):  
     for p in result["pages"]:
         # Get Next Chunks
         chuncks = shared_oci.cutInChunks( p )

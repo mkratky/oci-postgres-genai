@@ -24,7 +24,8 @@ def closeDbConn():
 
 # -- createDoc -----------------------------------------------------------------
 
-def createDoc(result,c):  
+def createDoc(result):  
+    content = ""
     for p in result["pages"]:
         # Concatenate the pages
         content = content + p
@@ -37,16 +38,16 @@ def createDoc(result,c):
 
 # -- insertDocs -----------------------------------------------------------------
 
-def insertDocs(result, c):  
+def insertDocs(result, content):  
     global dbConn
     cur = dbConn.cursor()
     stmt = """
-        INSERT INTO docs_chunck (
+        INSERT INTO docs (
             application_name, author, translation, cohere_embed, content, content_type,
             creation_date, modified, other1, other2, other3, parsed_by,
             filename, path, publisher, region, summary
         )
-        VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+        VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
         RETURNING id
     """
     data = (
@@ -54,7 +55,7 @@ def insertDocs(result, c):
             dictString(result,"author"),
             dictString(result,"translation"),
             dictString(result,"cohereEmbed"),
-            c,
+            content,
             dictString(result,"contentType"),
             dictString(result,"creationDate"),
             dictString(result,"modified"),
@@ -72,9 +73,9 @@ def insertDocs(result, c):
         cur.execute(stmt, data)
         # Get generated id
         result["doc_id"] = cur.fetchone()[0]
-        log(f"Successfully inserted {cur.rowcount} records.")
+        log(f"<insertDocs> Successfully inserted {cur.rowcount} records.")
     except (Exception, psycopg2.Error) as error:
-        log(f"Error inserting records: {error}")
+        log(f"<insertDocs> Error inserting records: {error}")
     finally:
         # Close the cursor and connection
         if cur:
@@ -88,28 +89,30 @@ def insertDocsChunck(result,c):
     stmt = """
         INSERT INTO docs_chunck (
             doc_id, translation, cohere_embed, content, content_type,
-            filename, path, region, summary, page
+            filename, path, region, summary, page, start, end
         )
-        VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+        VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
     """
     data = [
         (dictInt(result,"docId"), 
             dictString(result,"translation"),
             dictString(result,"cohereEmbed"),
-            c,
+            c.text,
             dictString(result,"contentType"),
             dictString(result,"filename"),
             dictString(result,"path"),
             os.getenv("TF_VAR_region"),
             dictString(result,"summary"),
-            dictInt(result,"page")
+            dictInt(result,"page"),
+            c.start,
+            c.end,
         )
     ]
     try:
         cur.executemany(stmt, data)
-        log(f"Successfully inserted {cur.rowcount} records.")
+        log(f"<insertDocsChunck> Successfully inserted {cur.rowcount} records.")
     except (Exception, psycopg2.Error) as error:
-        log(f"Error inserting records: {error}")
+        log(f"<insertDocsChunck> Error inserting records: {error}")
     finally:
         # Close the cursor and connection
         if cur:
