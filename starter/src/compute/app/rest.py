@@ -56,6 +56,11 @@ def cohere_chat():
     chatHistory = request.json.get('chatHistory')
     documents = request.json.get('documents')
     documentPath = request.json.get('documentPath')
+    if documentPath is not None:
+        shared_db.initDbConn()
+        content = shared_db.getDocByPath( documentPath )
+        shared_db.closeDbConn()
+        documents = [ { path: documentPath, snippet: content } ]    
     result = shared_oci.cohere_chat( message, chatHistory, documents, documentPath )  
     log("Result="+str(result))  
     return json.dumps(result)  
