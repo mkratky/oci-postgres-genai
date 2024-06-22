@@ -57,6 +57,5 @@ CREATE TABLE docs_chunck (
     summary text
 );
 
- o.filename, o.path, o.content, o.content_type, o.region, o.page, o.summary, tv.score
 
 
