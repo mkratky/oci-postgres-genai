@@ -1,0 +1,29 @@
+{
+    "compartmentId": "ocid1.compartment.oc1..aaaaaaaa4lwvzifc7ccwfv2fthpjys25b4ogazljgqfyk26eh2cnkhjcr6ka",
+    "servingMode": {
+        "modelId": "cohere.command-r-16k",
+        "servingType": "ON_DEMAND"
+    },
+    "chatRequest": {
+        "maxTokens": 600,
+        "temperature": 1,
+        "preambleOverride": "",
+        "frequencyPenalty": 0,
+        "presencePenalty": 0,
+        "topP": 0.75,
+        "topK": 0,
+        "isStream": true,
+        "chatHistory": [
+            {
+                "role": "USER",
+                "message": "write a python code that print 1"
+            },
+            {
+                "role": "CHATBOT",
+                "message": "Here's a simple Python code that prints the number 1:\n```python\nprint(1)\n```\n\nWhen you run this code, it will output:\n1"
+            }
+        ],
+        "message": "same with 2",
+        "apiFormat": "COHERE"
+    }
+}

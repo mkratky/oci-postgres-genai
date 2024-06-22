@@ -24,13 +24,23 @@ def closeDbConn():
     global dbConn 
     dbConn.close()
 
-# -- insertDb -----------------------------------------------------------------
+# -- insertDoc -----------------------------------------------------------------
 
-def insertDb(result,c):  
+def insertDoc(result,c):  
+    for p in result["pages"]:
+        # Get Next Chunks
+        chuncks = shared_oci.cutInChunks( p )
+        for c in chuncks:
+            result["cohereEmbed"] = shared_oci.embedText(c)
+            insertDocChunck(result,c)    
+
+# -- insertDocChunck -----------------------------------------------------------------
+
+def insertDocChunck(result,c):  
     global dbConn
     cur = dbConn.cursor()
     stmt = """
-        INSERT INTO oic (
+        INSERT INTO docs_chunck (
             application_name, author, translation, cohere_embed, content, content_type,
             creation_date, modified, other1, other2, other3, parsed_by,
             filename, path, publisher, region, summary, page
@@ -68,18 +78,18 @@ def insertDb(result,c):
         if cur:
             cur.close()
 
-# -- deleteDb -----------------------------------------------------------------
+# -- deleteDoc -----------------------------------------------------------------
 
-def deleteDb(path):  
+def deleteDoc(path):  
     global dbConn
     cur = dbConn.cursor()
-    stmt = "delete from oic where path=:1"
-    log(f"<deleteDb> path={path}")
+    stmt = "delete from docs_chunck where path=:1"
+    log(f"<deleteDoc> path={path}")
     try:
         cur.execute(stmt, (path,))
-        print(f"<deleteDb> Successfully {cur.rowcount} deleted")
+        print(f"<deleteDoc> Successfully {cur.rowcount} deleted")
     except (Exception) as error:
-        print(f"<deleteDb> Error deleting: {error}")
+        print(f"<deleteDoc> Error deleting: {error}")
     finally:
         # Close the cursor and connection
         if cur:
@@ -91,27 +101,27 @@ def queryDb( type, question, embed ):
     if type=="search":
         # Text search example
         query = """
-        SELECT filename, path, TO_CHAR(SUBSTR(content,1,1000)) content_char, content_type, region, page, summary, score(99) FROM docs
+        SELECT filename, path, TO_CHAR(SUBSTR(content,1,1000)) content_char, content_type, region, page, summary, score(99) FROM docs_chunck
         WHERE CONTAINS(content, {0}, 99)>0 order by score(99) DESC FETCH FIRST 10 ROWS ONLY
         """.format(question)
     elif type=="semantic":
         query = """
-        SELECT filename, path, TO_CHAR(SUBSTR(content,1,1000)) content_char, content_type, region, page, summary, 1 score FROM docs
+        SELECT filename, path, TO_CHAR(SUBSTR(content,1,1000)) content_char, content_type, region, page, summary, 1 score FROM docs_chunck
         ORDER BY cohere_embed <=> '{0}' FETCH FIRST 10 ROWS ONLY
         """.format(embed)
     elif type in ["hybrid","rag"]:
         query = """
         WITH text_search AS (
-            SELECT id, score(99) as score FROM docs
+            SELECT id, score(99) as score FROM docs_chunck
             WHERE CONTAINS(content, {0}, 99)>0 order by score(99) DESC FETCH FIRST 10 ROWS ONLY
         ),
         vector_search AS (
             SELECT id, cohere_embed <=> '{1}' AS vector_distance
-            FROM docs
+            FROM docs_chunck
         )
         SELECT o.filename, o.path, TO_CHAR(SUBSTR(content,1,1000)) content_char, o.content_type, o.region, o.page, o.summary,
             (0.3 * ts.score + 0.7 * (1 - vs.vector_distance)) AS score
-        FROM docs o
+        FROM docs_chunck o
         JOIN text_search ts ON o.id = ts.id
         JOIN vector_search vs ON o.id = vs.id
         ORDER BY score DESC

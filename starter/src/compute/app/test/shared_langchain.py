@@ -37,13 +37,23 @@ def closeDbConn():
     global dbConn 
     dbConn.close()
 
-# -- insertDb -----------------------------------------------------------------
+# -- insertDoc -----------------------------------------------------------------
 
-def insertDb(result,c):  
+def insertDoc(result,c):  
+    for p in result["pages"]:
+        # Get Next Chunks
+        chuncks = shared_oci.cutInChunks( p )
+        for c in chuncks:
+            result["cohereEmbed"] = shared_oci.embedText(c)
+            insertDocChunck(result,c)
+
+# -- insertDocChunck -----------------------------------------------------------------
+
+def insertDocChunck(result,c):  
     global dbConn
     cur = dbConn.cursor()
     stmt = """
-        INSERT INTO oic (
+        INSERT INTO docs_chunck (
             application_name, author, translation, cohere_embed, content, content_type,
             creation_date, modified, other1, other2, other3, parsed_by,
             filename, path, publisher, region, summary, page
@@ -81,18 +91,18 @@ def insertDb(result,c):
         if cur:
             cur.close()
 
-# -- deleteDb -----------------------------------------------------------------
+# -- deleteDoc -----------------------------------------------------------------
 
-def deleteDb(path):  
+def deleteDoc(path):  
     global dbConn
     cur = dbConn.cursor()
-    stmt = "delete from oic where path=:1"
-    log(f"<deleteDb> path={path}")
+    stmt = "delete from docs_chunck where path=:1"
+    log(f"<deleteDoc> path={path}")
     try:
         cur.execute(stmt, (path,))
-        print(f"<deleteDb> Successfully {cur.rowcount} deleted")
+        print(f"<deleteDoc> Successfully {cur.rowcount} deleted")
     except (Exception) as error:
-        print(f"<deleteDb> Error deleting: {error}")
+        print(f"<deleteDoc> Error deleting: {error}")
     finally:
         # Close the cursor and connection
         if cur:

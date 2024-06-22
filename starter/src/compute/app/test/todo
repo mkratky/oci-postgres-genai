@@ -7,7 +7,7 @@ CREATE EXTENSION IF NOT EXISTS vector;
 Create a table that mirrors the structure of the OpenSearch index.
 sql
 
-CREATE TABLE oic (
+CREATE TABLE docs_chunck (
     id SERIAL PRIMARY KEY,
     application_name TEXT,
     author TEXT,
@@ -32,9 +32,9 @@ CREATE TABLE oic (
 Create indexes to optimize searching, especially for the vector field.
 sql
 
-CREATE INDEX ON oic USING ivfflat (cohere_embed) WITH (lists = 100);
-CREATE INDEX ON oic (filename);
-CREATE INDEX ON oic (path);
+CREATE INDEX ON docs_chunck USING ivfflat (cohere_embed) WITH (lists = 100);
+CREATE INDEX ON docs_chunck (filename);
+CREATE INDEX ON docs_chunck (path);
 4. Adapt Document Ingestion Pipeline
 Update your document ingestion pipeline to insert data into PostgreSQL instead of OpenSearch.
 python
@@ -49,7 +49,7 @@ cur = conn.cursor()
 # Function to insert document chunks
 def insert_document_chunks(documents):
     query = """
-    INSERT INTO oic (application_name, author, translation, cohere_embed, content, content_type, 
+    INSERT INTO docs_chunck (application_name, author, translation, cohere_embed, content, content_type, 
                      creation_date, date, modified, other1, other2, other3, parsed_by, 
                      filename, path, publisher, region, summary)
     VALUES %s
@@ -75,11 +75,11 @@ For searching with PostgreSQL, use SQL queries to perform text and vector search
 sql
 
 -- Text search example
-SELECT * FROM oic WHERE content ILIKE '%search_term%';
+SELECT * FROM docs_chunck WHERE content ILIKE '%search_term%';
 
 -- Vector search example
 SELECT *, cohere_embed <=> '[0.1, 0.2, 0.3]' AS distance
-FROM oic
+FROM docs_chunck
 ORDER BY distance
 LIMIT 10;
 
@@ -89,16 +89,16 @@ sql
 
 WITH text_search AS (
     SELECT id, ts_rank_cd(to_tsvector(content), plainto_tsquery('search_term')) AS text_rank
-    FROM oic
+    FROM docs_chunck
     WHERE content @@ plainto_tsquery('search_term')
 ),
 vector_search AS (
     SELECT id, cohere_embed <=> '[0.1, 0.2, 0.3]' AS vector_distance
-    FROM oic
+    FROM docs_chunck
 )
 SELECT o.id, o.content, 
        (0.3 * ts.text_rank + 0.7 * (1 - vs.vector_distance)) AS hybrid_score
-FROM oic o
+FROM docs_chunck o
 JOIN text_search ts ON o.id = ts.id
 JOIN vector_search vs ON o.id = vs.id
 ORDER BY hybrid_score DESC

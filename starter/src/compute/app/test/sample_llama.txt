@@ -44,3 +44,11 @@
         ]
     }
 }
+
+curl "http://152.70.190.7:8080/chat?message={"role": "USER",
+                "content": [
+
+curl -d "@data.txt" -H "Content-Type: application/json" -X POST http://127.0.0.1:8080/chat                  
+
+
+messages={ "role": "USER", "content": [{"type": "TEXT","text": "write a python code that counts from 1 to 20"}]}"

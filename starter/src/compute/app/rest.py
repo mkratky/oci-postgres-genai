@@ -5,7 +5,7 @@ from flask_cors import CORS
 import shared_oci
 from shared_oci import log
 import shared_db
-import oci
+import json
 
 app = Flask(__name__)
 CORS(app)
@@ -43,15 +43,21 @@ def generate():
     log("Result="+str(result))  
     return str(result)   
 
-@app.route('/chat', methods=['GET','POST'])
-def chat():
-    if request.method=='POST':
-        prompt = request.json.get('messages')
-    else:
-        prompt = request.args.get('messages')
+@app.route('/llama_chat', methods=['POST'])
+def llama_chat():
+    messages = request.json.get('messages')
     result = shared_oci.llama_chat( messages )  
     log("Result="+str(result))  
-    return str(result)  
+    return json.dumps(result)  
+
+@app.route('/cohere_chat', methods=['POST'])
+def cohere_chat():
+    message = request.json.get('message')
+    chatHistory = request.json.get('chatHistory')
+    documents = request.json.get('documents')
+    result = shared_oci.cohere_chat( message, chatHistory, documents )  
+    log("Result="+str(result))  
+    return json.dumps(result)  
 
 @app.route('/info')
 def info():

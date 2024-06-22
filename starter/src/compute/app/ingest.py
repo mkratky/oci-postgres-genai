@@ -13,70 +13,6 @@ import shared_db
 from datetime import datetime
 from base64 import b64decode
 
-from base64 import b64decode
-
-## -- cutInChunks -----------------------------------------------------------
-
-def cutInChunks(text):
-    result = []
-    prev = ""
-    i = 0
-    last_good_separator = 0
-    last_medium_separator = 0
-    last_bad_separator = 0
-    maxlen = 250
-    chunck_start = 0
-    chunck_end = 0
-
-    i = 0
-    while i<len(text)-1:
-        i += 1
-        cur = text[i]
-        cur2 = prev + cur
-        prev = cur
-
-        if cur2 in [ ". ", ".[" , ".\n", "\n\n" ]:
-            last_good_separator = i
-        if cur in [ "\n" ]:          
-            last_medium_separator = i
-        if cur in [ " " ]:          
-            last_bad_separator = i
-        # log( 'cur=' + cur + ' / cur2=' + cur2 )
-        if i-chunck_start>maxlen:
-            chunck_end = i
-            if last_good_separator > 0:
-               chunck_end = last_good_separator
-            elif last_medium_separator > 0:
-               chunck_end = last_medium_separator
-            elif last_bad_separator > 0:
-               chunck_end = last_bad_separator
-            if text[chunck_end] in [ "[", "(" ]:
-                chunck = text[chunck_start:chunck_end-1]
-            else:     
-                chunck = text[chunck_start:chunck_end]
-            log("chunck_start= " + str(chunck_start) + " - " + chunck)   
-            result.append( chunck )
-            chunck_start=chunck_end 
-            last_good_separator = 0
-            last_medium_separator = 0
-            last_bad_separator = 0
-    # Last chunck
-    chunck = text[chunck_start:]
-    log("chunck_start= " + str(chunck_start) + " - " + chunck)  
-    result.append( chunck )
-
-    # Overlapping chuncks
-    if len(result)==1:
-        return result
-    else: 
-        result2 = [];
-        previous = None
-        for c in result:
-            if previous!=None:
-                result2.append( previous + c )
-            previous = c 
-        return result2
-
 ## -- stream_cursor --------------------------------------------------------
 
 def stream_cursor(sc, sid, group_name, instance_name):
@@ -124,14 +60,12 @@ def stream_loop(client, stream_id, initial_cursor):
         # use the next-cursor for iteration
         cursor = get_response.headers["opc-next-cursor"]
 
-
-
 ## -- eventDocument --------------------------------------------------------
 
 def eventDocument(value):
     eventType = value["eventType"]
     # ex: /n/fr03kzmuvhtf/b/psql-public-bucket/o/country.pdf"
-    # XXX OIC: resourcePath
+    # XXX resourcePath
     resourceId = value["data"]["resourceId"]
     log( "eventType=" + eventType + " - " + resourceId ) 
 
@@ -178,7 +112,6 @@ def insertDocument(value):
        return 
 
     # Summary 
-    summary = "-"
     if len(result["content"])>250:
         result["summary"] = shared_oci.summarizeContent(value, result["content"])
     
@@ -188,19 +121,14 @@ def insertDocument(value):
     # If no page, just add the content
     if result.get("pages") == None:
         result["pages"] = [ result["content"] ]
-            
-    for p in result["pages"]:
-        # Get Next Chunks
-        chuncks = cutInChunks( p )
-        for c in chuncks:
-            result["cohereEmbed"] = shared_oci.embedText(c)
-            shared_db.insertDb(result,c)
+
+    shared_db.createDoc(result)        
                 
 ## -- deleteDocument --------------------------------------------------------
 
 def deleteDocument(path):
     log( "<deleteDocument>")
-    shared_db.deleteDb(path)
+    shared_db.deleteDoc(path)
     log( "</deleteDocument>")
 
 ## -- main ------------------------------------------------------------------

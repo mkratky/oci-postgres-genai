@@ -52,6 +52,68 @@ def dictInt(d,key):
        return int(value)     
 
 
+## -- cutInChunks -----------------------------------------------------------
+
+def cutInChunks(text):
+    result = []
+    prev = ""
+    i = 0
+    last_good_separator = 0
+    last_medium_separator = 0
+    last_bad_separator = 0
+    maxlen = 250
+    chunck_start = 0
+    chunck_end = 0
+
+    i = 0
+    while i<len(text)-1:
+        i += 1
+        cur = text[i]
+        cur2 = prev + cur
+        prev = cur
+
+        if cur2 in [ ". ", ".[" , ".\n", "\n\n" ]:
+            last_good_separator = i
+        if cur in [ "\n" ]:          
+            last_medium_separator = i
+        if cur in [ " " ]:          
+            last_bad_separator = i
+        # log( 'cur=' + cur + ' / cur2=' + cur2 )
+        if i-chunck_start>maxlen:
+            chunck_end = i
+            if last_good_separator > 0:
+               chunck_end = last_good_separator
+            elif last_medium_separator > 0:
+               chunck_end = last_medium_separator
+            elif last_bad_separator > 0:
+               chunck_end = last_bad_separator
+            if text[chunck_end] in [ "[", "(" ]:
+                chunck = text[chunck_start:chunck_end-1]
+            else:     
+                chunck = text[chunck_start:chunck_end]
+            log("chunck_start= " + str(chunck_start) + " - " + chunck)   
+            result.append( chunck )
+            chunck_start=chunck_end 
+            last_good_separator = 0
+            last_medium_separator = 0
+            last_bad_separator = 0
+    # Last chunck
+    chunck = text[chunck_start:]
+    log("chunck_start= " + str(chunck_start) + " - " + chunck)  
+    result.append( chunck )
+
+    # Overlapping chuncks
+    if len(result)==1:
+        return result
+    else: 
+        result2 = [];
+        previous = None
+        for c in result:
+            if previous!=None:
+                result2.append( previous + c )
+            previous = c 
+        return result2
+
 ## -- embedText ------------------------------------------------------
 
 #XXXXX Ideally all vector should be created in one call
@@ -118,29 +180,56 @@ def generateText(prompt):
 
 ## -- llama ------------------------------------------------------
 
-def llama_chat(messages):
-    """
-            Messages format:
+def llama_chat2(prompt):
+    global signer
+    log( "<llama_chat2>")
+    compartmentId = os.getenv("TF_VAR_compartment_ocid")
+    endpoint = 'https://inference.generativeai.eu-frankfurt-1.oci.oraclecloud.com/20231130/actions/chat'
+    #         "modelId": "ocid1.generativeaimodel.oc1.us-chicago-1.amaaaaaask7dceyafhwal37hxwylnpbcncidimbwteff4xha77n5xz4m7p6a",
+    #         "modelId": "cohere.command-r-16k",
+    body = { 
+        "compartmentId": compartmentId,
+        "servingMode": {
+            "modelId": "meta.llama-3-70b-instruct",
+            "servingType": "ON_DEMAND"
+        },
+        "chatRequest": {
+            "apiFormat": "GENERIC",
+            "maxTokens": 600,
+            "temperature": 0,
+            "preambleOverride": "",
+            "presencePenalty": 0,
+            "topP": 0.75,
+            "topK": 0,
             "messages": [
-            {
-                "role": "USER",
-                "content": [
-                    {
-                        "type": "TEXT",
-                        "text": "write a python code that counts from 1 to 20"
-                    }
-                ]
-            },
-            {
-                "role": "ASSISTANT",
-                "content": [
-                    {
-                        "type": "TEXT",
-                        "text": "Here is a simple Python code that counts from 1 to 20:\n```\nfor i in range(1, 21):\n    print(i)\n```\nExplanation:\n\n* `range(1, 21)` generates a sequence of numbers from 1 to 20 (inclusive).\n* The `for` loop iterates over this sequence, assigning each number to the variable `i`.\n* The `print(i)` statement prints the current value of `i` to the console.\n\nWhen you run this code, you should see the numbers 1 to 20 printed to the console, one per line.\n\nAlternatively, you can use a `while` loop to achieve the same result:\n```\ni = 1\nwhile i <= 20:\n    print(i)\n    i += 1\n```\nBut the `for` loop is generally more concise and Pythonic!"
-                    }
-                ]
-            }            
-    """
+                {
+                    "role": "USER", 
+                    "content": [
+                        {
+                            "type": "TEXT",
+                            "text": prompt
+                        }
+                    ]
+                }  
+            ]
+        }
+    }
+    resp = requests.post(endpoint, json=body, auth=signer)
+    resp.raise_for_status()
+    log(resp)    
+    # Binary string conversion to utf8
+    log_in_file("llama_chat_resp", resp.content.decode('utf-8'))
+    j = json.loads(resp.content)   
+    s = j["chatResponse"]["text"]
+    if s.startswith('```json'):
+        start_index = s.find("{") 
+        end_index = s.rfind("}")+1
+        s = s[start_index:end_index]
+    log( "</llama_chat2>")
+    return s
+
+def llama_chat(messages):
+    ## XXXX DOES NOT WORK XXXX ?
     global signer
     log( "<llama_chat>")
     compartmentId = os.getenv("TF_VAR_compartment_ocid")
@@ -156,13 +245,11 @@ def llama_chat(messages):
         "chatRequest": {
             "maxTokens": 600,
             "temperature": 0,
-            "preambleOverride": "",
             "frequencyPenalty": 0,
             "presencePenalty": 0,
             "topP": 0.75,
             "topK": 0,
             "isStream": False,
-            "chatHistory": [],
             "messages": messages,
             "apiFormat": "GENERIC"
         }
@@ -183,9 +270,9 @@ def llama_chat(messages):
 
 ## -- chat ------------------------------------------------------
 
-def cohere_chat(prompt):
+def cohere_chat(prompt, chatHistory, documents):
     global signer
-    log( "<chat>")
+    log( "<cohere_chat>")
     compartmentId = os.getenv("TF_VAR_compartment_ocid")
     endpoint = 'https://inference.generativeai.us-chicago-1.oci.oraclecloud.com/20231130/actions/chat'
     #         "modelId": "ocid1.generativeaimodel.oc1.us-chicago-1.amaaaaaask7dceyafhwal37hxwylnpbcncidimbwteff4xha77n5xz4m7p6a",
@@ -205,23 +292,21 @@ def cohere_chat(prompt):
             "topP": 0.75,
             "topK": 0,
             "isStream": False,
-            "chatHistory": [],
             "message": prompt,
+            "chatHistory": chatHistory,
+            "documents": documents,
             "apiFormat": "COHERE"
         }
     }
+    log_in_file("cohere_chat_request", json.dumps(body)) 
     resp = requests.post(endpoint, json=body, auth=signer)
     resp.raise_for_status()
     log(resp)    
     # Binary string conversion to utf8
-    log_in_file("chat_resp", resp.content.decode('utf-8'))
+    log_in_file("cohere_chat_resp", resp.content.decode('utf-8'))
     j = json.loads(resp.content)   
-    s = j["chatResponse"]["text"]
-    if s.startswith('```json'):
-        start_index = s.find("{") 
-        end_index = s.rfind("}")+1
-        s = s[start_index:end_index]
-    log( "</chat>")
+    s = j["chatResponse"]
+    log( "</cohere_chat>")
     return s
 
 ## -- invokeTika ------------------------------------------------------------------

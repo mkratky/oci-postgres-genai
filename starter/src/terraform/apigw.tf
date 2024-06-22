@@ -82,6 +82,28 @@ resource "oci_apigateway_deployment" "starter_apigw_deployment" {
       }
     }      
     routes {
+      path    = "/app/cohere_chat"
+      methods = [ "ANY" ]
+      backend {
+        type = "HTTP_BACKEND"
+        url    = "http://${data.oci_core_instance.starter_bastion.public_ip}:8080/cohere_chat"
+        connect_timeout_in_seconds = 10
+        read_timeout_in_seconds = 30
+        send_timeout_in_seconds = 30        
+      }
+    }    
+    routes {
+      path    = "/app/llama_chat"
+      methods = [ "ANY" ]
+      backend {
+        type = "HTTP_BACKEND"
+        url    = "http://${data.oci_core_instance.starter_bastion.public_ip}:8080/llama_chat"
+        connect_timeout_in_seconds = 10
+        read_timeout_in_seconds = 30
+        send_timeout_in_seconds = 30        
+      }
+    }            
+    routes {
       path    = "/app/info"
       methods = [ "ANY" ]
       backend {

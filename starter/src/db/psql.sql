@@ -11,29 +11,46 @@ INSERT INTO DEPT VALUES (40, 'OPERATIONS', 'SEOUL');
 
 CREATE EXTENSION  IF NOT EXISTS vector;
 
-CREATE TABLE oic (
+CREATE TABLE docs (
     id bigserial PRIMARY KEY, 
 
     content text,
+    summary text,
     translation text,
     cohere_embed vector(1024),
 
+    filename varchar(256),    
+    path varchar(1024),    
+    content_type varchar(256),
+    region varchar(256),    
+
     application_name varchar(256),
     author varchar(256),
-    content_type varchar(256),
     creation_date varchar(256),    
-    date varchar(256),    
     modified varchar(256),    
     other1 varchar(1024),    
     other2 varchar(1024),    
     other3 varchar(1024),    
     parsed_by varchar(256),    
+    publisher varchar(256)
+);
+
+CREATE TABLE docs_chunck (
+    id bigserial PRIMARY KEY, 
+    doc_id bigint,
+
+    content text,
+    translation text,
+    cohere_embed vector(1024),
+
     filename varchar(256),    
     path varchar(1024),    
-    publisher varchar(256),    
+    content_type varchar(256),
     region varchar(256),    
-    summary text,
-    page integer
+    page integer,
+    summary text
 );
+
+ o.filename, o.path, o.content, o.content_type, o.region, o.page, o.summary, tv.score
 
 
