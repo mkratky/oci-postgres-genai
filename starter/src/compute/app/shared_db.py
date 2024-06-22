@@ -32,9 +32,10 @@ def createDoc(result):
         # Get Next Chunks
         chuncks = shared_oci.cutInChunks( p )
         for c in chuncks:
-            log( c )
             c["cohereEmbed"] = shared_oci.embedText(c["chunck"])
+            log( c )
             insertDocsChunck(result,c)
+    result["summaryEmbed"] = shared_oci.embedText(result["summary"])        
     insertDocs( result, content )
 
 # -- insertDocs -----------------------------------------------------------------
@@ -55,7 +56,7 @@ def insertDocs(result, content):
             dictString(result,"applicationName"), 
             dictString(result,"author"),
             dictString(result,"translation"),
-            dictString(result,"cohereEmbed"),
+            dictString(result,"summaryEmbed"),
             content,
             dictString(result,"contentType"),
             dictString(result,"creationDate"),
