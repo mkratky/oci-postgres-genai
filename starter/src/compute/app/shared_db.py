@@ -185,9 +185,9 @@ def queryDb( type, question, embed ):
 # -- getDocByPath ----------------------------------------------------------------------
 
 def getDocByPath( path ):
-    query = "SELECT filename, path, content, content_type, region, page, summary FROM docs WHERE path={0}'".format(path)
+    query = "SELECT filename, path, content, content_type, region, summary FROM docs WHERE path=%s"
     cursor = dbConn.cursor()
-    cursor.execute(query)
+    cursor.execute(query,(path,))
     deptRows = cursor.fetchall()
     if len(deptRows)==1:
         content = deptRows[0][2]
