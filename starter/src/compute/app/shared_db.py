@@ -32,7 +32,7 @@ def createDoc(result):
         # Get Next Chunks
         chuncks = shared_oci.cutInChunks( p )
         for c in chuncks:
-            result["cohereEmbed"] = shared_oci.embedText(c)
+            c["cohereEmbed"] = shared_oci.embedText(c["chunck"])
             insertDocsChunck(result,c)
     insertDocs( result, content )
 
@@ -96,16 +96,16 @@ def insertDocsChunck(result,c):
     data = [
         (dictInt(result,"docId"), 
             dictString(result,"translation"),
-            dictString(result,"cohereEmbed"),
-            c.chunck,
+            c["cohereEmbed"],
+            c["chunck"],
             dictString(result,"contentType"),
             dictString(result,"filename"),
             dictString(result,"path"),
             os.getenv("TF_VAR_region"),
             dictString(result,"summary"),
             dictInt(result,"page"),
-            c.char_start,
-            c.char_end,
+            c["char_start"],
+            c["char_end"]
         )
     ]
     try:
