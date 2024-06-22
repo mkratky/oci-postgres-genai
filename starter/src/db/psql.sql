@@ -12,6 +12,7 @@ INSERT INTO DEPT VALUES (40, 'OPERATIONS', 'SEOUL');
 CREATE EXTENSION  IF NOT EXISTS vector;
 
 DROP TABLE docs;
+
 CREATE TABLE docs (
     id bigserial PRIMARY KEY, 
 
@@ -37,6 +38,7 @@ CREATE TABLE docs (
 );
 
 DROP TABLE docs_chunck;
+
 CREATE TABLE docs_chunck (
     id bigserial PRIMARY KEY, 
     doc_id bigint,
@@ -50,8 +52,8 @@ CREATE TABLE docs_chunck (
     content_type varchar(256),
     region varchar(256),    
     page integer,
-    start integer,
-    end integer,
+    char_start integer,
+    char_end integer,
     summary text
 );
 

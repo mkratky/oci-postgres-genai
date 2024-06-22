@@ -62,8 +62,8 @@ def cutInChunks(text):
     last_medium_separator = 0
     last_bad_separator = 0
     maxlen = 250
-    chunck_start = 0
-    chunck_end = 0
+    char_start = 0
+    char_end = 0
 
     i = 0
     while i<len(text)-1:
@@ -79,28 +79,29 @@ def cutInChunks(text):
         if cur in [ " " ]:          
             last_bad_separator = i
         # log( 'cur=' + cur + ' / cur2=' + cur2 )
-        if i-chunck_start>maxlen:
-            chunck_end = i
+        if i-char_start>maxlen:
+            char_end = i
             if last_good_separator > 0:
-               chunck_end = last_good_separator
+               char_end = last_good_separator
             elif last_medium_separator > 0:
-               chunck_end = last_medium_separator
+               char_end = last_medium_separator
             elif last_bad_separator > 0:
-               chunck_end = last_bad_separator
-            if text[chunck_end] in [ "[", "(" ]:
-                chunck = text[chunck_start:chunck_end-1]
+               char_end = last_bad_separator
+            if text[char_end] in [ "[", "(" ]:
+                chunck = text[char_start:char_end-1]
+                result.append( { chunck: chunck, char_start: char_start, char_end: char_end-1 } )
             else:     
-                chunck = text[chunck_start:chunck_end]
-            log("chunck_start= " + str(chunck_start) + " - " + chunck)   
-            result.append( chunck )
-            chunck_start=chunck_end 
+                chunck = text[char_start:char_end]
+                result.append( { chunck: chunck, char_start: char_start, char_end: char_end } )
+            log("char_start= " + str(char_start) + " - " + chunck)   
+            char_start=char_end 
             last_good_separator = 0
             last_medium_separator = 0
             last_bad_separator = 0
     # Last chunck
-    chunck = text[chunck_start:]
-    log("chunck_start= " + str(chunck_start) + " - " + chunck)  
-    result.append( chunck )
+    chunck = text[char_start:]
+    log("char_start= " + str(char_start) + " - " + chunck)  
+    result.append( { chunck: chunck, char_start: char_start, char_end: len(text) } )
 
     # Overlapping chuncks
     if len(result)==1:
@@ -110,7 +111,7 @@ def cutInChunks(text):
         previous = None
         for c in result:
             if previous!=None:
-                result2.append( previous + c )
+                result2.append( { chunck: previous.chunck+c.chunck, start: previous.start, end: c.end } )
             previous = c 
         return result2
 

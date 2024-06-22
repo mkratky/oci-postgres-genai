@@ -89,7 +89,7 @@ def insertDocsChunck(result,c):
     stmt = """
         INSERT INTO docs_chunck (
             doc_id, translation, cohere_embed, content, content_type,
-            filename, path, region, summary, page, start, end
+            filename, path, region, summary, page, char_start, char_end
         )
         VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
     """
@@ -97,15 +97,15 @@ def insertDocsChunck(result,c):
         (dictInt(result,"docId"), 
             dictString(result,"translation"),
             dictString(result,"cohereEmbed"),
-            c.text,
+            c.chunck,
             dictString(result,"contentType"),
             dictString(result,"filename"),
             dictString(result,"path"),
             os.getenv("TF_VAR_region"),
             dictString(result,"summary"),
             dictInt(result,"page"),
-            c.start,
-            c.end,
+            c.char_start,
+            c.char_end,
         )
     ]
     try:
