@@ -55,7 +55,8 @@ def cohere_chat():
     message = request.json.get('message')
     chatHistory = request.json.get('chatHistory')
     documents = request.json.get('documents')
-    result = shared_oci.cohere_chat( message, chatHistory, documents )  
+    documentPath = request.json.get('documentPath')
+    result = shared_oci.cohere_chat( message, chatHistory, documents, documentPath )  
     log("Result="+str(result))  
     return json.dumps(result)  
 

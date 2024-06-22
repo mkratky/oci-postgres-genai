@@ -133,7 +133,6 @@ def deleteDoc(path):
         if cur:
             cur.close()
 
-
 # -- queryDb ----------------------------------------------------------------------
 
 def queryDb( type, question, embed ):
@@ -183,4 +182,17 @@ def queryDb( type, question, embed ):
         log("content: "+r["content"][:150])
     return result
 
+# -- getDocByPath ----------------------------------------------------------------------
 
+def getDocByPath( path ):
+    query = "SELECT filename, path, content, content_type, region, page, summary FROM docs WHERE path={0}'".format(path)
+    cursor = dbConn.cursor()
+    cursor.execute(query)
+    deptRows = cursor.fetchall()
+    if len(deptRows)==1:
+        content = deptRows[0][2]
+        return content
+    else:
+        log( "<getDocByPath>Row returned: " + len(deptRows) )
+        return "-"
+    

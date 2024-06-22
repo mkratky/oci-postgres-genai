@@ -274,9 +274,13 @@ def llama_chat(messages):
 
 ## -- chat ------------------------------------------------------
 
-def cohere_chat(prompt, chatHistory, documents):
+def cohere_chat(prompt, chatHistory, documents, documentPath):
     global signer
     log( "<cohere_chat>")
+    if documentPath is not None:
+        content = shared_db.getDocByPath( documentPath )
+        documents = [ { path: documentPath, snippet: content } ]
+
     compartmentId = os.getenv("TF_VAR_compartment_ocid")
     endpoint = 'https://inference.generativeai.us-chicago-1.oci.oraclecloud.com/20231130/actions/chat'
     #         "modelId": "ocid1.generativeaimodel.oc1.us-chicago-1.amaaaaaask7dceyafhwal37hxwylnpbcncidimbwteff4xha77n5xz4m7p6a",
