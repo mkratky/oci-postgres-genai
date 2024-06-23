@@ -7,17 +7,11 @@ from shared_oci import log
 from shared_oci import dictString
 from shared_oci import dictInt
 
+import getpass
+import os
+
 # Langchain
-from langchain_community.document_loaders.oracleai import (
-    OracleDocLoader,
-    OracleTextSplitter,
-)
-from langchain_community.embeddings.oracleai import OracleEmbeddings
-from langchain_community.utilities.oracleai import OracleSummary
-from langchain_community.vectorstores import oraclevs
-from langchain_community.vectorstores.oraclevs import OracleVS
-from langchain_community.vectorstores.utils import DistanceStrategy
-from langchain_core.documents import Document
+
 
 # Connection
 dbConn = None
@@ -25,6 +19,9 @@ dbConn = None
 ## -- initDbConn --------------------------------------------------------------
 
 def initDbConn():
+    os.environ["LANGCHAIN_TRACING_V2"] = "true"
+    os.environ["LANGCHAIN_API_KEY"] = getpass.getpass()
+
     global dbConn 
     # Thick driver...
     oracledb.init_oracle_client()
