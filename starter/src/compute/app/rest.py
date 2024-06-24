@@ -5,6 +5,7 @@ from flask_cors import CORS
 import shared_oci
 from shared_oci import log
 import shared_db
+import shared_langchain
 import json
 
 app = Flask(__name__)
@@ -22,12 +23,15 @@ def query():
     log( "----------------------------------------")
     log( "type: " + str(type))
     log( "question: " + str(question))
-    try:
-        shared_db.initDbConn()
-        embed = shared_oci.embedText(question)
-        a = shared_db.queryDb( type, question, embed) 
-    finally:
-        shared_db.closeDbConn()
+    if type=='langchain':
+        a = shared_langchain.queryDb( question )
+    else:
+        try:
+            shared_db.initDbConn()
+            embed = shared_oci.embedText(question)
+            a = shared_db.queryDb( type, question, embed) 
+        finally:
+            shared_db.closeDbConn()
 
     response = jsonify(a)
     response.status_code = 200

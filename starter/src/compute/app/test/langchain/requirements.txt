@@ -1,3 +1,4 @@
 langchain
 langchain_community
 langchain_chroma
+faiss-cpu
