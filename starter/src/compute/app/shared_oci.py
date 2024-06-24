@@ -638,7 +638,7 @@ def decodeJson(value):
         }
     else:
         # Speech
-        original_resourcename = resourceName[:resourceName.index(".json")][resourceName.index("_"):]
+        original_resourcename = resourceName[:resourceName.index(".json")][resourceName.index("bucket_")+7]
         original_resourceid = "/n/" + namespace + "/b/" + bucketName + "/o/" + original_resourcename
         result = {
             "filename": original_resourcename,
