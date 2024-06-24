@@ -2,6 +2,7 @@
 import os
 import psycopg2
 import shared_oci 
+import shared_langchain
 from shared_oci import log
 from shared_oci import dictString
 from shared_oci import dictInt
@@ -33,6 +34,7 @@ def createDoc(result):
         for c in chuncks:
             c["cohereEmbed"] = shared_oci.embedText(c["chunck"])
             insertDocsChunck(result,c)
+    shared_langchain.insertDocsChunck(result)     
 
 # -- insertDocs -----------------------------------------------------------------
 
@@ -132,6 +134,8 @@ def deleteDoc(path):
         # Close the cursor and connection
         if cur:
             cur.close()
+    shared_langchain.deleteDoc(dbConn,path)     
+
 
 # -- queryDb ----------------------------------------------------------------------
 

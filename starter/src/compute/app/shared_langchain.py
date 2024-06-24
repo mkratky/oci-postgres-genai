@@ -1,9 +1,9 @@
 # Import
 import os
-import shared_oci 
 from shared_oci import log
 from shared_oci import dictString
 from shared_oci import dictInt
+import psycopg2
 
 from langchain_core.documents import Document
 from langchain_postgres import PGVector
@@ -26,7 +26,7 @@ embeddings = OCIGenAIEmbeddings(
 
 vectorstore = PGVector(
     embeddings=embeddings,
-    collection_name=collection_name,
+    collection_name="docs",
     connection=connection,
     use_jsonb=True,
 )
@@ -34,6 +34,7 @@ vectorstore = PGVector(
 # -- insertDocsChunck -----------------------------------------------------------------
 
 def insertDocsChunck(result):  
+    log("<langchain insertDocsChunck>")
     docs = [
         Document(
             page_content=dictString(result,"content"),
@@ -60,20 +61,30 @@ def insertDocsChunck(result):
         collection_name="docs",
         connection=connection
     )
+    log("</langchain insertDocsChunck>")
 
 # -- deleteDoc -----------------------------------------------------------------
 
-def deleteDoc(path):  
-    docs = vectorstore.similarity_search("", filter={{"path": path}} )    
-    print("count before", vectorstore._collection.count())
-    for doc, score in docs:
-        vectorstore._collection.delete(doc.id)
-    print("count after", vectorstore._collection.count())
+def deleteDoc(dbConn, path):
+    # XXXXX # There is no delete implemented in langchain pgvector..
+    cur = dbConn.cursor()
+    stmt = "delete FROM langchain_pg_embedding WHERE cmetadata->>'path'=%s"
+    log(f"<langchain deleteDoc> path={path}")
+    try:
+        cur.execute(stmt, (path,))
+        print(f"<langchain deleteDoc> Successfully {cur.rowcount} deleted")
+    except (Exception, psycopg2.Error) as error:
+        print(f"<langchain deleteDoc> Error deleting: {error}")
+    finally:
+        # Close the cursor and connection
+        if cur:
+            cur.close()    
+    # delete FROM langchain_pg_embedding WHERE cmetadata->>'path'='/n/fr03kzmuvhtf/b/psql-public-bucket/o/disco.pdf';
 
 # -- queryDb ----------------------------------------------------------------------
 
 def queryDb( question ):
-    docs_with_score: List[Tuple[Document, float]] = db.similarity_search_with_score(question, k=10)
+    docs_with_score: List[Tuple[Document, float]] = vectorstore.similarity_search_with_score(question, k=10)
 
     result = [] 
     for doc, score in docs_with_score:
@@ -82,10 +93,11 @@ def queryDb( question ):
                 "filename": doc.metadata['filename'], 
                 "path": doc.metadata['path'], 
                 "content": doc.page_content, 
-                "contentType": doc.metadata['contentType'], 
+                "contentType": doc.metadata['content_type'], 
                 "region": doc.metadata['region'], 
                 "page": doc.metadata['page'], 
                 "summary": doc.metadata['summary'], 
                 "score": score 
             }) 
+    return result
 

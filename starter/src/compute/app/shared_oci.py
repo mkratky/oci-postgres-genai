@@ -68,7 +68,7 @@ def cutInChunks(text):
     last_good_separator = 0
     last_medium_separator = 0
     last_bad_separator = 0
-    maxlen = 250
+    MAXLEN = 250
     char_start = 0
     char_end = 0
 
@@ -86,7 +86,7 @@ def cutInChunks(text):
         if cur in [ " " ]:          
             last_bad_separator = i
         # log( 'cur=' + cur + ' / cur2=' + cur2 )
-        if i-char_start>maxlen:
+        if i-char_start>MAXLEN:
             char_end = i
             if last_good_separator > 0:
                char_end = last_good_separator
@@ -111,11 +111,19 @@ def cutInChunks(text):
         return result
     else: 
         result2 = []
-        previous = None
+        s= ""
+        chunck_count=0
+        chunck_start=1
         for c in result:
-            if previous!=None:
-                result2.append( { "chunck": previous["chunck"]+c["chunck"], "char_start": previous["char_start"], "char_end": c["char_end"] } )
-            previous = c 
+            s = s+c["chunck"]
+            chunck_count = chunck_count + 1
+            if chunck_count==4:
+                result2.append( { "chunck": s, "char_start": chunck_start, "char_end": c["char_end"] } )
+                s = c["chunck"]
+                chunck_start = c["char_start"]
+                chunck_count = 0
+        if chunck_count>0:
+            result2.append( { "chunck": s, "char_start": chunck_start, "char_end": len(text) } )
         return result2
 
 ## -- embedText ------------------------------------------------------
