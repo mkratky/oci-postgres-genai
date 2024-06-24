@@ -111,19 +111,16 @@ def cutInChunks(text):
         return result
     else: 
         result2 = []
-        s= ""
         chunck_count=0
-        chunck_start=1
+        chunck_start=0
         for c in result:
-            s = s+c["chunck"]
             chunck_count = chunck_count + 1
             if chunck_count==4:
-                result2.append( { "chunck": s, "char_start": chunck_start, "char_end": c["char_end"] } )
-                s = c["chunck"]
+                appendChunck( result2, text, chunck_start, c["char_end"] )
                 chunck_start = c["char_start"]
                 chunck_count = 0
         if chunck_count>0:
-            result2.append( { "chunck": s, "char_start": chunck_start, "char_end": len(text) } )
+            appendChunck( result2, text, chunck_start, c["char_end"] )
         return result2
 
 ## -- embedText ------------------------------------------------------
