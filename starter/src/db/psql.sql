@@ -11,8 +11,7 @@ INSERT INTO DEPT VALUES (40, 'OPERATIONS', 'SEOUL');
 
 CREATE EXTENSION  IF NOT EXISTS vector;
 
-DROP TABLE docs;
-
+-- DROP TABLE docs;
 CREATE TABLE docs (
     id bigserial PRIMARY KEY, 
 
@@ -37,8 +36,7 @@ CREATE TABLE docs (
     publisher varchar(256)
 );
 
-DROP TABLE docs_chunck;
-
+-- DROP TABLE docs_chunck;
 CREATE TABLE docs_chunck (
     id bigserial PRIMARY KEY, 
     doc_id bigint,

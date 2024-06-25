@@ -18,6 +18,7 @@ TF_VAR_deploy_type=compute
 
 UI_NAME=search_ui
 BUILD_DIR=$TARGET_DIR/jetui
+sha1sum $UI_NAME.zip > $TARGET_DIR/jetui.sha1
 if [ -d $BUILD_DIR ]; then
   cd $BUILD_DIR
   node_modules/grunt-cli/bin/grunt vb-clean
@@ -25,6 +26,7 @@ else
   mkdir $BUILD_DIR
   cd $BUILD_DIR
   unzip $SCRIPT_DIR/$UI_NAME.zip
+  cp $TARGET_DIR/jetui.sha1 $BUILD_DIR/.
   npm install
 fi
 
