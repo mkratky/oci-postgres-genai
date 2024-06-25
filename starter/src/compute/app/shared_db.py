@@ -73,7 +73,9 @@ def insertDocs(result ):
     try:
         cur.execute(stmt, data)
         # Get generated id
-        result["doc_id"] = cur.fetchone()[0]
+        res= cur.fetchone()
+        print( res )
+        result["doc_id"] = res[0]
         log(f"<insertDocs> Successfully inserted {cur.rowcount} records.")
     except (Exception, psycopg2.Error) as error:
         log(f"<insertDocs> Error inserting records: {error}")
@@ -124,11 +126,12 @@ def insertDocsChunck(result,c):
 def deleteDoc(path):  
     global dbConn
     cur = dbConn.cursor()
-    stmt = "delete from docs_chunck where path=%s"
     log(f"<deleteDoc> path={path}")
     try:
-        cur.execute(stmt, (path,))
-        print(f"<deleteDoc> Successfully {cur.rowcount} deleted")
+        cur.execute("delete from docs_chunck where path=%s", (path,))
+        print(f"<deleteDoc> Successfully {cur.rowcount} docs_chunck deleted")
+        cur.execute("delete from docs where path=%s", (path,))
+        print(f"<deleteDoc> Successfully {cur.rowcount} docs deleted")
     except (Exception, psycopg2.Error) as error:
         print(f"<deleteDoc> Error deleting: {error}")
     finally:

@@ -581,7 +581,7 @@ def documentUnderstanding(value):
         "outputLocation": {
             "namespaceName": namespace,
             "bucketName": bucketName,
-            "prefix": "document"
+            "prefix": "docunderstanding"
         }
     }
     resp = document_understanding_client.create_processor_job(job)
@@ -613,7 +613,7 @@ def decodeJson(value):
     log("Read file from object storage: "+ file_name)
     j = json.loads(file_content)   
 
-    if resourceName[:resourceName.index("/")] == "document":
+    if resourceName[:resourceName.index("/")] == "docunderstanding":
         # DocUnderstanding
         concat_text = ""
         pages = []
@@ -638,7 +638,7 @@ def decodeJson(value):
         }
     else:
         # Speech
-        original_resourcename = resourceName[:resourceName.index(".json")][resourceName.index("bucket_")+7]
+        original_resourcename = resourceName[:resourceName.index(".json")][resourceName.index("bucket_")+7:]
         original_resourceid = "/n/" + namespace + "/b/" + bucketName + "/o/" + original_resourcename
         result = {
             "filename": original_resourcename,
