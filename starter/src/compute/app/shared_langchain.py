@@ -14,7 +14,6 @@ from typing import List, Tuple
 
 # Globals
 connection = "postgresql+psycopg://"+os.getenv('DB_USER')+":"+os.getenv('DB_PASSWORD')+"@"+os.getenv('DB_URL')+":5432/postgres"  # Uses psycopg3!
-print( connection )
 compartmentId = os.getenv("TF_VAR_compartment_ocid")
 
 embeddings = OCIGenAIEmbeddings(
