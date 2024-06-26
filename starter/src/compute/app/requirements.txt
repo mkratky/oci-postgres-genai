@@ -10,3 +10,8 @@ oci
 
 # HTTP Client
 requests
+
+# Langchain
+langchain
+langchain_community
+langchain_chroma
