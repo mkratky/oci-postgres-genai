@@ -103,6 +103,7 @@ def insertDocument(value):
         return
     elif resourceName.endswith("/"):
         # Ignore
+        log("IGNORE /")
         return
     else:
         result = shared_oci.invokeTika(value)
