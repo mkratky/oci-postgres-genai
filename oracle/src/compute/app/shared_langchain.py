@@ -3,7 +3,6 @@ import os
 from shared_oci import log
 from shared_oci import dictString
 from shared_oci import dictInt
-import psycopg2
 
 from langchain_core.documents import Document
 from langchain_postgres import PGVector
@@ -13,7 +12,6 @@ from langchain_text_splitters import CharacterTextSplitter
 from typing import List, Tuple
 
 # Globals
-connection = "postgresql+psycopg://"+os.getenv('DB_USER')+":"+os.getenv('DB_PASSWORD')+"@"+os.getenv('DB_URL')+":5432/postgres"  # Uses psycopg3!
 compartmentId = os.getenv("TF_VAR_compartment_ocid")
 
 embeddings = OCIGenAIEmbeddings(
@@ -23,16 +21,10 @@ embeddings = OCIGenAIEmbeddings(
     auth_type="INSTANCE_PRINCIPAL"
 )
 
-vectorstore = PGVector(
-    embeddings=embeddings,
-    collection_name="docs",
-    connection=connection,
-    use_jsonb=True,
-)
-
 # -- insertDocsChunck -----------------------------------------------------------------
 
 def insertDocsChunck(result):  
+    return
     log("<langchain insertDocsChunck>")
     docs = [
         Document(
@@ -65,6 +57,8 @@ def insertDocsChunck(result):
 # -- deleteDoc -----------------------------------------------------------------
 
 def deleteDoc(dbConn, path):
+    return
+
     # XXXXX # There is no delete implemented in langchain pgvector..
     cur = dbConn.cursor()
     stmt = "delete FROM langchain_pg_embedding WHERE cmetadata->>'path'=%s"
