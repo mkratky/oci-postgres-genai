@@ -5,6 +5,7 @@ import oracledb
 from shared_oci import log
 from shared_oci import dictString
 from shared_oci import dictInt
+import shared_langchain
 
 # Connection
 dbConn = None
@@ -27,32 +28,36 @@ def closeDbConn():
 # -- createDoc -----------------------------------------------------------------
 
 def createDoc(result):  
+    result["summaryEmbed"] = shared_oci.embedText(result["summary"])        
+    insertDocs( result )
     for p in result["pages"]:
         # Get Next Chunks
         chuncks = shared_oci.cutInChunks( p )
         for c in chuncks:
-            result["cohereEmbed"] = shared_oci.embedText(c)
-            insertDocChunck(result,c)    
+            c["cohereEmbed"] = shared_oci.embedText(c["chunck"])
+            insertDocsChunck(result,c)
+    shared_langchain.insertDocsChunck(result)     
 
-# -- insertDocChunck -----------------------------------------------------------------
+# -- insertDocs -----------------------------------------------------------------
 
-def insertDocChunck(result,c):  
+def insertDocs(result ):  
     global dbConn
     cur = dbConn.cursor()
     stmt = """
-        INSERT INTO docs_chunck (
-            application_name, author, translation, cohere_embed, content, content_type,
+        INSERT INTO docs (
+            application_name, author, translation, summary_embed, content, content_type,
             creation_date, modified, other1, other2, other3, parsed_by,
-            filename, path, publisher, region, summary, page
+            filename, path, publisher, region, summary
         )
-        VALUES (:1, :2, :3, :4, :5, :6, :7, :8, :9, :10, :11, :12, :13, :14, :15, :16, :17, :18)
+        VALUES (:1, :2, :3, :4, :5, :6, :7, :8, :9, :10, :11, :12, :13, :14, :15, :16, :17)
+        RETURNING id
     """
-    data = [
-        (dictString(result,"applicationName"), 
+    data = (
+            dictString(result,"applicationName"), 
             dictString(result,"author"),
             dictString(result,"translation"),
-            array.array("f", result["cohereEmbed"]),
-            c,
+            dictString(result,"summaryEmbed"),
+            dictString(result,"content"),
             dictString(result,"contentType"),
             dictString(result,"creationDate"),
             dictString(result,"modified"),
@@ -64,15 +69,55 @@ def insertDocChunck(result,c):
             dictString(result,"path"),
             dictString(result,"publisher"),
             os.getenv("TF_VAR_region"),
+            dictString(result,"summary")
+        )
+    try:
+        cur.execute(stmt, data)
+        # Get generated id
+        res= cur.fetchone()
+        print( res )
+        result["doc_id"] = res[0]
+        log(f"<insertDocs> Successfully inserted {cur.rowcount} records.")
+    except (Exception, psycopg2.Error) as error:
+        log(f"<insertDocs> Error inserting records: {error}")
+    finally:
+        # Close the cursor and connection
+        if cur:
+            cur.close()
+
+
+# -- insertDocChunck -----------------------------------------------------------------
+
+def insertDocsChunck(result,c):  
+    global dbConn
+    cur = dbConn.cursor()
+    stmt = """
+        INSERT INTO docs_chunck (
+            doc_id, translation, cohere_embed, content, content_type,
+            filename, path, region, summary, page, char_start, char_end
+        )
+        VALUES (:1, :2, :3, :4, :5, :6, :7, :8, :9, :10, :11, :12)
+    """
+    data = [
+        (dictInt(result,"docId"), 
+            dictString(result,"translation"),
+            c["cohereEmbed"],
+            c["chunck"],
+            dictString(result,"contentType"),
+            dictString(result,"filename"),
+            dictString(result,"path"),
+            os.getenv("TF_VAR_region"),
             dictString(result,"summary"),
-            dictInt(result,"page")
+            dictInt(result,"page"),
+            c["char_start"],
+            c["char_end"]
         )
     ]
     try:
         cur.executemany(stmt, data)
-        print(f"Successfully inserted {cur.rowcount} records.")
-    except (Exception) as error:
-        print(f"Error inserting records: {error}")
+        log(f"<insertDocsChunck> Successfully inserted {cur.rowcount} records.")
+    except (Exception, psycopg2.Error) as error:
+        log(f"<insertDocsChunck> Error inserting records: {error}")
     finally:
         # Close the cursor and connection
         if cur:
@@ -83,17 +128,20 @@ def insertDocChunck(result,c):
 def deleteDoc(path):  
     global dbConn
     cur = dbConn.cursor()
-    stmt = "delete from docs_chunck where path=:1"
     log(f"<deleteDoc> path={path}")
     try:
-        cur.execute(stmt, (path,))
-        print(f"<deleteDoc> Successfully {cur.rowcount} deleted")
-    except (Exception) as error:
+        cur.execute("delete from docs_chunck where path=:1", (path,))
+        print(f"<deleteDoc> Successfully {cur.rowcount} docs_chunck deleted")
+        cur.execute("delete from docs where path=:1", (path,))
+        print(f"<deleteDoc> Successfully {cur.rowcount} docs deleted")
+    except (Exception, psycopg2.Error) as error:
         print(f"<deleteDoc> Error deleting: {error}")
     finally:
         # Close the cursor and connection
         if cur:
             cur.close()
+    shared_langchain.deleteDoc(dbConn,path)     
+
 
 # -- queryDb ----------------------------------------------------------------------
 
@@ -145,4 +193,13 @@ def queryDb( type, question, embed ):
     return result
 
 
+# -- getDocByPath ----------------------------------------------------------------------
 
+def getDocByPath( path ):
+    query = "SELECT filename, path, content, content_type, region, summary FROM docs WHERE path=:1"
+    cursor = dbConn.cursor()
+    cursor.execute(query,(path,))
+    rows = cursor.fetchall()
+    for row in rows:
+        return row[2]  
+    return "-"  
