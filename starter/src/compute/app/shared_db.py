@@ -198,6 +198,6 @@ def getDocByPath( path ):
     cursor.execute(query,(path,))
     rows = cursor.fetchall()
     for row in rows:
-        return row[2].read() 
+        return row[2] 
     log("<getDocByPath>Docs not found: " + path)
     return "-"  
