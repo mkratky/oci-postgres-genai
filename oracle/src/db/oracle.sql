@@ -1,5 +1,6 @@
-create user vector identified by '&1'
+create user vector identified by &1;
 grant unlimited tablespace to vector;
+grant resource to vector;
 
 -- DROP TABLE docs;
 CREATE TABLE vector.docs (

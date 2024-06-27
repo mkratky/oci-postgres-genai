@@ -18,4 +18,5 @@ DB  = $DB_URL
 EOT
 
 export TNS_ADMIN=$SCRIPT_DIR
+echo sqlplus -L $DB_USER/$DB_PASSWORD@DB @oracle.sql
 sqlplus -L $DB_USER/$DB_PASSWORD@DB @oracle.sql
