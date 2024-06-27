@@ -74,7 +74,7 @@ def insertDocs(result ):
         cur.execute(stmt, data)
         # Get generated id
         res= cur.fetchone()
-        print( res )
+        log("<insertDocs> returning id=" + res[0] )        
         result["doc_id"] = res[0]
         log(f"<insertDocs> Successfully inserted {cur.rowcount} records.")
     except (Exception, psycopg2.Error) as error:
@@ -184,7 +184,7 @@ def queryDb( type, question, embed ):
     cursor.execute(query)
     rows = cursor.fetchall()
     for row in rows:
-        result.append( {"filename": row[0], "path": row[1], "content": row[2], "contentType": row[3], "region": row[4], "page": row[5], "summary": row[6], "score": row[7]} )  
+        result.append( {"filename": row[0], "path": row[1], "content": row[2] , "contentType": row[3], "region": row[4], "page": row[5], "summary": row[6], "score": row[7]} )  
     for r in result:
         log("filename="+r["filename"])
         log("content: "+r["content"][:150])
@@ -198,5 +198,6 @@ def getDocByPath( path ):
     cursor.execute(query,(path,))
     rows = cursor.fetchall()
     for row in rows:
-        return row[2]  
+        return row[2].read() 
+    log("<getDocByPath>Docs not found: " + path)
     return "-"  

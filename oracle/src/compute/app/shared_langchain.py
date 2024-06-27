@@ -66,7 +66,7 @@ def deleteDoc(dbConn, path):
     try:
         cur.execute(stmt, (path,))
         print(f"<langchain deleteDoc> Successfully {cur.rowcount} deleted")
-    except (Exception, psycopg2.Error) as error:
+    except (Exception) as error:
         print(f"<langchain deleteDoc> Error deleting: {error}")
     finally:
         # Close the cursor and connection
