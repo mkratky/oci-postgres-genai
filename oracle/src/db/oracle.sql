@@ -43,4 +43,4 @@ CREATE TABLE vector.docs_chunck (
 
 create index vector.docs_index on vector.docs_chunck( content ) indextype is ctxsys.context;  
 
-
+exit
