@@ -46,9 +46,9 @@ def insertDocs(result ):
         INSERT INTO docs (
             application_name, author, translation, summary_embed, content, content_type,
             creation_date, modified, other1, other2, other3, parsed_by,
-            filename, path, publisher, region, summary
+            filename, path, publisher, region, summary, source_type
         )
-        VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+        VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
         RETURNING id
     """
     data = (
@@ -68,7 +68,8 @@ def insertDocs(result ):
             dictString(result,"path"),
             dictString(result,"publisher"),
             os.getenv("TF_VAR_region"),
-            dictString(result,"summary")
+            dictString(result,"summary"),
+            dictString(result,"source_type")
         )
     try:
         cur.execute(stmt, data)

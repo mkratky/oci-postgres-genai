@@ -1,30 +1,28 @@
 # Import
 import os
+import shared_db
 from shared_oci import log
 from shared_oci import dictString
 from shared_oci import dictInt
 
 from langchain_core.documents import Document
-from langchain_postgres import PGVector
-from langchain_postgres.vectorstores import PGVector
+from langchain_community.vectorstores.oraclevs import OracleVS
 from langchain_community.embeddings import OCIGenAIEmbeddings
 from langchain_text_splitters import CharacterTextSplitter
+from langchain_community.vectorstores.utils import DistanceStrategy
 from typing import List, Tuple
 
 # Globals
-compartmentId = os.getenv("TF_VAR_compartment_ocid")
-
 embeddings = OCIGenAIEmbeddings(
     model_id="cohere.embed-multilingual-v3.0",
     service_endpoint="https://inference.generativeai.us-chicago-1.oci.oraclecloud.com",
-    compartment_id=compartmentId,
+    compartment_id=os.getenv("TF_VAR_compartment_ocid"),
     auth_type="INSTANCE_PRINCIPAL"
 )
 
 # -- insertDocsChunck -----------------------------------------------------------------
 
-def insertDocsChunck(result):  
-    return
+def insertDocsChunck(dbConn, result):  
     log("<langchain insertDocsChunck>")
     docs = [
         Document(
@@ -46,22 +44,21 @@ def insertDocsChunck(result):
     ]
     text_splitter = CharacterTextSplitter(chunk_size=1000, chunk_overlap=200)
     docs_chunck = text_splitter.split_documents(docs)
-    db = PGVector.from_documents(
-        embedding=embeddings,
-        documents=docs_chunck,
-        collection_name="docs",
-        connection=connection
+    vectorstore = OracleVS.from_documents(
+        docs_chunck,
+        embeddings,
+        client=dbConn,
+        table_name="docs_langchain",
+        distance_strategy=DistanceStrategy.DOT_PRODUCT,
     )
     log("</langchain insertDocsChunck>")
 
 # -- deleteDoc -----------------------------------------------------------------
 
 def deleteDoc(dbConn, path):
-    return
-
     # XXXXX # There is no delete implemented in langchain pgvector..
     cur = dbConn.cursor()
-    stmt = "delete FROM langchain_pg_embedding WHERE cmetadata->>'path'=%s"
+    stmt = "delete FROM docs_langchain WHERE cmetadata->>'path'=%s"
     log(f"<langchain deleteDoc> path={path}")
     try:
         cur.execute(stmt, (path,))
@@ -77,7 +74,15 @@ def deleteDoc(dbConn, path):
 # -- queryDb ----------------------------------------------------------------------
 
 def queryDb( question ):
+    shared_db.initDbConn()
+    vectorstore = OracleVS(
+        embedding_function=embeddings,
+        client=shared_db.dbConn,
+        table_name="docs_langchain",
+        distance_strategy=DistanceStrategy.DOT_PRODUCT,        
+    )
     docs_with_score: List[Tuple[Document, float]] = vectorstore.similarity_search_with_score(question, k=10)
+    shared_db.closeDbConn()
 
     result = [] 
     for doc, score in docs_with_score:
@@ -93,4 +98,8 @@ def queryDb( question ):
                 "score": score 
             }) 
     return result
+
+# select v.SQL_TEXT from v$sql v where lower(SQL_TEXT) like '%docs_langchain%'
+# INSERT INTO docs_langchain (id, text, metadata, embedding) VALUES (:1, :2, :3, :4)
+# SELECT id, text, metadata, vector_distance(embedding, :embedding,	DOT) as distance FROM docs_langchain ORDER BY distance FETCH APPROX FIRST 10 ROWS ONLY
 

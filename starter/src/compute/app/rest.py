@@ -37,6 +37,7 @@ def query():
     response.status_code = 200
     return response   
 
+# Replaced by cohere_chat
 @app.route('/generate', methods=['GET','POST'])
 def generate():
     if request.method=='POST':
@@ -47,6 +48,7 @@ def generate():
     log("Result="+str(result))  
     return str(result)   
 
+# Replaced by cohere_chat
 @app.route('/llama_chat', methods=['POST'])
 def llama_chat():
     messages = request.json.get('messages')

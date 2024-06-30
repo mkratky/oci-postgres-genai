@@ -3,6 +3,7 @@ import os
 import json 
 import requests
 import oci
+from datetime import datetime
 
 # Constant
 LOG_DIR = '/tmp/app_log'
@@ -19,7 +20,8 @@ if os.path.isdir(LOG_DIR) == False:
 ## -- log ------------------------------------------------------------------
 
 def log(s):
-   print( s, flush=True)
+   dt = datetime.now().strftime("%d/%m/%Y %H:%M:%S")
+   print( "["+dt+"] "+ str(s), flush=True)
 
 ## -- log_in_file --------------------------------------------------------
 
@@ -49,7 +51,7 @@ def dictInt(d,key):
    if value is None:
        return 0
    else:
-       return int(value)     
+       return int(float(value))     
 
 
 ## -- appendChunk -----------------------------------------------------------

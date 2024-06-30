@@ -33,14 +33,15 @@ CREATE TABLE docs (
     other2 varchar(1024),    
     other3 varchar(1024),    
     parsed_by varchar(256),    
-    publisher varchar(256)
+    publisher varchar(256),
+    source_type varchar(256)
 );
 
 -- DROP TABLE docs_chunck;
 CREATE TABLE docs_chunck (
     id bigserial PRIMARY KEY, 
     doc_id bigint,
-
+    fileblob BYTEA,
     content text,
     translation text,
     cohere_embed vector(1024),

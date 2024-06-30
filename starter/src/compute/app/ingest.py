@@ -16,7 +16,7 @@ from base64 import b64decode
 ## -- stream_cursor --------------------------------------------------------
 
 def stream_cursor(sc, sid, group_name, instance_name):
-    print(" Creating a cursor for group {}, instance {}".format(group_name, instance_name))
+    log("<stream_cursor>")
     cursor_details = oci.streaming.models.CreateGroupCursorDetails(group_name=group_name, instance_name=instance_name,
                                                                    type=oci.streaming.models.
                                                                    CreateGroupCursorDetails.TYPE_TRIM_HORIZON,
@@ -111,6 +111,8 @@ def insertDocument(value):
     log_in_file("content", result["content"])
     if len(result["content"])==0:
        return 
+    
+    result["source_type"] = "OBJECT_STORAGE"
 
     # Summary 
     if len(result["content"])>250:

@@ -37,7 +37,7 @@ def createDoc(result):
         for c in chuncks:
             c["cohereEmbed"] = shared_oci.embedText(c["chunck"])
             insertDocsChunck(result,c)
-    shared_langchain.insertDocsChunck(result)     
+    shared_langchain.insertDocsChunck(dbConn,result)     
 
 # -- insertDocs -----------------------------------------------------------------
 
@@ -48,10 +48,10 @@ def insertDocs(result ):
         INSERT INTO docs (
             application_name, author, translation, summary_embed, content, content_type,
             creation_date, modified, other1, other2, other3, parsed_by,
-            filename, path, publisher, region, summary
+            filename, path, publisher, region, summary, source_type
         )
-        VALUES (:1, :2, :3, :4, :5, :6, :7, :8, :9, :10, :11, :12, :13, :14, :15, :16, :17)
-        RETURNING id INTO :18
+        VALUES (:1, :2, :3, :4, :5, :6, :7, :8, :9, :10, :11, :12, :13, :14, :15, :16, :17, :18)
+        RETURNING id INTO :19
     """
     id_var = cur.var(oracledb.NUMBER)
     data = (
@@ -72,14 +72,15 @@ def insertDocs(result ):
             dictString(result,"publisher"),
             os.getenv("TF_VAR_region"),
             dictString(result,"summary"),
+            dictString(result,"source_type"),
             id_var
         )
     try:
         cur.execute(stmt, data)
         # Get generated id
         id = id_var.getvalue()    
-        log("<insertDocs> returning id=" + str(id) )        
-        result["doc_id"] = id
+        log("<insertDocs> returning id=" + str(id[0]) )        
+        result["docId"] = id[0]
         log(f"<insertDocs> Successfully inserted {cur.rowcount} records.")
     except (Exception) as error:
         log(f"<insertDocs> Error inserting records: {error}")
