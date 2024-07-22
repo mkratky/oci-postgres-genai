@@ -29,12 +29,12 @@ def closeDbConn():
 def createDoc(result):  
     result["summaryEmbed"] = shared_oci.embedText(result["summary"])        
     insertDocs( result )
-    for p in result["pages"]:
-        # Get Next Chunks
+    for pageNumber in result["pages"]:
+        p = result["pages"][pageNumber]; 
         chuncks = shared_oci.cutInChunks( p )
         for c in chuncks:
             c["cohereEmbed"] = shared_oci.embedText(c["chunck"])
-            insertDocsChunck(result,c)
+            insertDocsChunck(result,c,pageNumber)
     shared_langchain.insertDocsChunck(result)     
 
 # -- insertDocs -----------------------------------------------------------------
@@ -87,7 +87,7 @@ def insertDocs(result ):
 
 # -- insertDocsChunck -----------------------------------------------------------------
 
-def insertDocsChunck(result,c):  
+def insertDocsChunck(result,c,pageNumber):  
     global dbConn
     cur = dbConn.cursor()
     stmt = """
@@ -107,7 +107,7 @@ def insertDocsChunck(result,c):
             dictString(result,"path"),
             os.getenv("TF_VAR_region"),
             dictString(result,"summary"),
-            dictInt(result,"page"),
+            pageNumber,
             c["char_start"],
             c["char_end"]
         )

@@ -618,12 +618,13 @@ def decodeJson(value):
     if resourceName[:resourceName.index("/")] == "docunderstanding":
         # DocUnderstanding
         concat_text = ""
-        pages = []
+        pages = {}
         for p in j.get("pages"):
+            pageNumber = p.get("pageNumber")
             page = ""
             for l in p.get("lines"):
                 page += l.get("text") + "\n"
-            pages.append(page)
+            pages[str(pageNumber)] = page
             concat_text += page + " "    
         original_resourcename = resourceName[:resourceName.index(".json")][resourceName.index("/results/")+9:]
         original_resourceid = "/n/" + namespace + "/b/" + bucketName + "/o/" + original_resourcename

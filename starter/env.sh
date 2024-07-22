@@ -13,7 +13,8 @@ export TF_VAR_deploy_type="function"
 export TF_VAR_language="java"
 export TF_VAR_db_user="postgres"
 
-# export TF_VAR_compartment_ocid=ocid1.compartment.xxxxx
+# TF_VAR_compartment_ocid : ocid1.compartment.xxxxx
+export TF_VAR_compartment_ocid="__TO_FILL__"
 # TF_VAR_db_password : Min length 12 characters, 2 lowercase, 2 uppercase, 2 numbers, 2 special characters. Ex: LiveLab__12345
 #   If not filled, it will be generated randomly during the first build.
 export TF_VAR_db_password="__TO_FILL__"

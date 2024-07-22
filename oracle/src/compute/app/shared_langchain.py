@@ -58,7 +58,7 @@ def insertDocsChunck(dbConn, result):
 def deleteDoc(dbConn, path):
     # XXXXX # There is no delete implemented in langchain pgvector..
     cur = dbConn.cursor()
-    stmt = "delete FROM docs_langchain WHERE cmetadata->>'path'=%s"
+    stmt = "delete FROM docs_langchain WHERE JSON_VALUE(metadata,'$.path')=:1"
     log(f"<langchain deleteDoc> path={path}")
     try:
         cur.execute(stmt, (path,))

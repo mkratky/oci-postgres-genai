@@ -72,7 +72,7 @@ def eventDocument(value):
     if eventType in ["com.oraclecloud.objectstorage.createobject", "com.oraclecloud.objectstorage.updateobject"]:
         insertDocument( value )
     elif eventType == "com.oraclecloud.objectstorage.deleteobject":
-        deleteDocument( value )
+        deleteDocument( resourceId )
 
 ## -- insertDocument --------------------------------------------------------
 
@@ -125,15 +125,15 @@ def insertDocument(value):
 
     # If no page, just add the content
     if result.get("pages") == None:
-        result["pages"] = [ result["content"] ]
+        result["pages"] = { "1": result["content"] }
 
     shared_db.createDoc(result)        
                 
 ## -- deleteDocument --------------------------------------------------------
 
-def deleteDocument(path):
+def deleteDocument(resourceId):
     log( "<deleteDocument>")
-    shared_db.deleteDoc(path)
+    shared_db.deleteDoc(resourceId)
     log( "</deleteDocument>")
 
 ## -- main ------------------------------------------------------------------
