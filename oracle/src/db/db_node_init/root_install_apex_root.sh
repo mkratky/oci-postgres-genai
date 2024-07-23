@@ -1,6 +1,7 @@
 # TO RUN AS ROOT
 if [ "$DB_PASSWORD" == "" ]; then
    echo "ERROR: DB_PASSWORD not set."
+   exit
 fi
 
 export DB_SERVICE_NAME=`sudo su - oracle -c "lsnrctl status | grep pdb1. | sed -e 's/.* \"//; s/\" .*//'"`

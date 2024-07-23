@@ -5,6 +5,7 @@ cd $SCRIPT_DIR
 # From How To Setup And Use DBMS_CLOUD Package (Doc ID 2748362.1)
 if [ "$DB_PASSWORD" == "" ]; then
    echo "ERROR: DB_PASSWORD not set."
+   exit
 fi
 
 # Install APEX
