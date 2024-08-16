@@ -40,7 +40,7 @@ ssh -o StrictHostKeyChecking=no -i $TF_VAR_ssh_private_path opc@$BASTION_IP "exp
 
 echo
 echo "-- SEARCH_URL -------"
-echo "https://${APIGW_HOSTNAME}/${TF_VAR_prefix}/"
+echo "https://${APIGW_HOSTNAME}/app/"
 echo "http://$BASTION_IP/"
 echo
 echo "Please wait 5 mins. The server is starting." 

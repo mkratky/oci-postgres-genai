@@ -48,7 +48,7 @@ resource "oci_apigateway_deployment" "starter_apigw_deployment" {
   compartment_id = local.lz_appdev_cmp_ocid
   display_name   = "${var.prefix}-apigw-deployment"
   gateway_id     = local.apigw_ocid
-  path_prefix    = "/${var.prefix}"
+  path_prefix    = "/app"
   specification {
     logging_policies {
       access_log {
@@ -60,7 +60,7 @@ resource "oci_apigateway_deployment" "starter_apigw_deployment" {
       }
     }
     routes {
-      path    = "/app/query"
+      path    = "/query"
       methods = [ "ANY" ]
       backend {
         type = "HTTP_BACKEND"
@@ -71,7 +71,7 @@ resource "oci_apigateway_deployment" "starter_apigw_deployment" {
       }
     }    
     routes {
-      path    = "/app/generate"
+      path    = "/generate"
       methods = [ "ANY" ]
       backend {
         type = "HTTP_BACKEND"
@@ -82,7 +82,7 @@ resource "oci_apigateway_deployment" "starter_apigw_deployment" {
       }
     }      
     routes {
-      path    = "/app/cohere_chat"
+      path    = "/cohere_chat"
       methods = [ "ANY" ]
       backend {
         type = "HTTP_BACKEND"
@@ -93,7 +93,7 @@ resource "oci_apigateway_deployment" "starter_apigw_deployment" {
       }
     }    
     routes {
-      path    = "/app/llama_chat"
+      path    = "/llama_chat"
       methods = [ "ANY" ]
       backend {
         type = "HTTP_BACKEND"
@@ -104,7 +104,7 @@ resource "oci_apigateway_deployment" "starter_apigw_deployment" {
       }
     }            
     routes {
-      path    = "/app/info"
+      path    = "/info"
       methods = [ "ANY" ]
       backend {
         type = "STOCK_RESPONSE_BACKEND"
@@ -132,5 +132,4 @@ resource "oci_apigateway_deployment" "starter_apigw_deployment" {
       }
     }
   }
-  freeform_tags = local.api_tags
-}
+
