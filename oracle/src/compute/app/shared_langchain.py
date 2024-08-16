@@ -9,6 +9,7 @@ from langchain_core.documents import Document
 from langchain_community.vectorstores.oraclevs import OracleVS
 from langchain_community.embeddings import OCIGenAIEmbeddings
 from langchain_text_splitters import CharacterTextSplitter
+from langchain.text_splitter import RecursiveCharacterTextSplitter
 from langchain_community.vectorstores.utils import DistanceStrategy
 from typing import List, Tuple
 
@@ -23,34 +24,34 @@ embeddings = OCIGenAIEmbeddings(
 # -- insertDocsChunck -----------------------------------------------------------------
 
 def insertDocsChunck(dbConn, result):  
+
     log("<langchain insertDocsChunck>")
-    docs = [
-        Document(
-            page_content=dictString(result,"content"),
-            metadata=
-            {
-                "doc_id": dictInt(result,"docId"), 
-                "translation": dictString(result,"translation"), 
-                "content_type": dictString(result,"contentType"),
-                "filename": dictString(result,"filename"), 
-                "path": dictString(result,"path"), 
-                "region": os.getenv("TF_VAR_region"), 
-                "summary": dictString(result,"summary"), 
-                "page": dictInt(result,"page"), 
-                "char_start": "0", 
-                "char_end": "0" 
-            },
-        )
-    ]
-    text_splitter = CharacterTextSplitter(chunk_size=1000, chunk_overlap=200)
-    docs_chunck = text_splitter.split_documents(docs)
-    vectorstore = OracleVS.from_documents(
-        docs_chunck,
-        embeddings,
-        client=dbConn,
-        table_name="docs_langchain",
-        distance_strategy=DistanceStrategy.DOT_PRODUCT,
-    )
+    vectorstore = OracleVS( client=dbConn, table_name="docs_langchain", embedding_function=embeddings, distance_strategy=DistanceStrategy.DOT_PRODUCT )
+    text_splitter = RecursiveCharacterTextSplitter(chunk_size=1000, chunk_overlap=100)      
+    for pageNumber in result["pages"]:
+        p = result["pages"][pageNumber]; 
+        log(f"<langchain insertDocsChunck> Page {pageNumber}")
+        docs = [
+            Document(
+                page_content=dictString(result,"content"),
+                metadata=
+                {
+                    "doc_id": dictInt(result,"docId"), 
+                    "translation": dictString(result,"translation"), 
+                    "content_type": dictString(result,"contentType"),
+                    "filename": dictString(result,"filename"), 
+                    "path": dictString(result,"path"), 
+                    "region": os.getenv("TF_VAR_region"), 
+                    "summary": dictString(result,"summary"), 
+                    "page": pageNumber, 
+                    "char_start": "0", 
+                    "char_end": "0" 
+                },
+            )
+        ]
+        docs_chunck = text_splitter.split_documents(docs)
+        print( docs_chunck )
+        vectorstore.add_documents( docs_chunck )
     log("</langchain insertDocsChunck>")
 
 # -- deleteDoc -----------------------------------------------------------------

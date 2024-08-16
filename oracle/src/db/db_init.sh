@@ -10,6 +10,7 @@ else
   wget https://download.oracle.com/otn_software/linux/instantclient/2340000/oracle-instantclient-basic-23.4.0.24.05-1.el8.x86_64.rpm
   wget https://download.oracle.com/otn_software/linux/instantclient/2340000/oracle-instantclient-sqlplus-23.4.0.24.05-1.el8.x86_64.rpm
   sudo dnf install -y oracle-instantclient-basic-23.4.0.24.05-1.el8.x86_64.rpm oracle-instantclient-sqlplus-23.4.0.24.05-1.el8.x86_64.rpm
+  mv *.rpm /tmp
 fi
 
 # Install the tables
