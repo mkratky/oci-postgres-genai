@@ -75,7 +75,7 @@ def insertDocs(result ):
         cur.execute(stmt, data)
         # Get generated id
         res= cur.fetchone()
-        log("<insertDocs> returning id=" + res[0] )        
+        log("<insertDocs> returning id=" + str(res[0]) )        
         result["doc_id"] = res[0]
         log(f"<insertDocs> Successfully inserted {cur.rowcount} records.")
     except (Exception, psycopg2.Error) as error:
