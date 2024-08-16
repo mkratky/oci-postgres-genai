@@ -22,8 +22,10 @@ if [ "$OCI_CLI_CLOUD_SHELL" == "True" ];  then
   # Use the precompiled VB app....
   tar xfz ui.tgz
 else
+  # Build from dev
   UI_NAME=search_ui
   BUILD_DIR=$TARGET_DIR/jetui
+  rm -Rf $BUILD_DIR
   sha1sum $UI_NAME.zip > $TARGET_DIR/jetui.sha1
   if [ -d $BUILD_DIR ]; then
     cd $BUILD_DIR
