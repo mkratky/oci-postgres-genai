@@ -132,4 +132,5 @@ resource "oci_apigateway_deployment" "starter_apigw_deployment" {
       }
     }
   }
-
+  freeform_tags = local.api_tags
+}
