@@ -17,7 +17,7 @@ TF_VAR_deploy_type=compute
 # XXXX
 
 ###############################################################
-## Last Minute WA - NodeJS is not available in cloud shell
+## Last Minute WA - NodeJS 20 is not available in cloud shell
 if [ "$OCI_CLI_CLOUD_SHELL" == "True" ];  then
   # Use the precompiled VB app....
   tar xfz ui.tgz
@@ -48,6 +48,9 @@ else
   mkdir -p ui
   rm -Rf ui/*
   cp -r $BUILD_DIR/build/processed/webApps/$UI_NAME/* ui/.
+  
+  rm ui.tgz
+  tar cfz ui.tgz ui
 fi 
 
 # Common Function
