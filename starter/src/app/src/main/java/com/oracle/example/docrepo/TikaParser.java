@@ -177,33 +177,7 @@ public class TikaParser {
             return "Exception in TikaObjectStorage: " + ex.getMessage();
         }
     }
-/*    
-    public String handleRequest(@InputBinding(coercion = OCIEventBinding.class) ObjectStorageObjectEvent event) {
-        System.err.println("Got a new event: " + event.toString());
-        try {
-            String namespace = event.additionalDetails.namespace;
-            String bucketName = event.additionalDetails.bucketName;
-            String resourceName = event.resourceName;
-            String compartmentId = event.compartmentId;
 
-            GetObjectResponse getObjectResponse = readObject(namespace, bucketName, resourceName);
-            String path = "https://objectstorage.eu-frankfurt-1.oraclecloud.com/n/" + namespace + "/b/" + bucketName
-                    + "/o/" + resourceName;
-
-            JsonObject jsondoc = parseObject(getObjectResponse, path);
-
-            streamObject(jsondoc, resourceName, compartmentId);
-            writeObject(jsondoc, namespace, outputBucketName, resourceName + ".json");
-            indexObject(jsondoc, resourceName);
-
-            return jsondoc.toString(); // "ok";
-        } catch (Exception ex) {
-            System.err.println("Exception in FDK " + ex.getMessage());
-            ex.printStackTrace();
-            return "oops";
-        }
-    }
-*/
     static class ResponseHandler<IN, OUT> implements AsyncHandler<IN, OUT> {
         private Throwable failed = null;
         private CountDownLatch latch = new CountDownLatch(1);
