@@ -128,7 +128,7 @@ resource "oci_apigateway_deployment" "starter_apigw_deployment" {
       methods = [ "ANY" ]
       backend {
         type = "HTTP_BACKEND"
-        url    = "${local.bucket_url}/$${request.path[pathname]}"
+        url    = "http://${data.oci_core_instance.starter_bastion.public_ip}/$${request.path[pathname]}"
       }
     }
   }
