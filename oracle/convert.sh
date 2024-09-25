@@ -6,7 +6,7 @@ rm -r starter/src/db/*
 rm starter/src/terraform/psql.tf
 cp -r oracle/* starter/.
 
-sed -i 's/TF_VAR_db_type="psql"/TF_VAR_db_type="database"/' starter/env.sh
+sed -i 's/TF_VAR_db_type="psql"/TF_VAR_db_type="autonomous"/' starter/env.sh
 sed -i 's/TF_VAR_prefix="psql"/TF_VAR_prefix="db23ai"/' starter/env.sh
 sed -i 's/TF_VAR_db_user="postgres"/TF_VAR_db_user="system"/' starter/env.sh
 sed -i 's/POSTGRES/DB23ai/' starter/src/compute/app/requirements.txt
