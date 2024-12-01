@@ -16,3 +16,6 @@ langchain
 langchain_community
 langchain_chroma
 langchain_postgres
+
+# Sitemap
+pdfkit

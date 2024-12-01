@@ -101,6 +101,11 @@ def insertDocument(value):
         # This will create a JSON file in Object Storage that will create a second even with resourceExtension "json" 
         shared_oci.documentUnderstanding(value)
         return
+    elif resourceExtension in [".sitemap"]:
+        # This will create a PDFs file in Object Storage with the content of each site (line) ".sitemap" 
+        shared_oci.sitemap(value)
+        return
+
     elif resourceName.endswith("/"):
         # Ignore
         log("IGNORE /")

@@ -590,6 +590,61 @@ def documentUnderstanding(value):
     log_in_file("documentUnderstanding_resp",str(resp.data))
     log( "</documentUnderstanding>")
 
+## -- sitemap ------------------------------------------------------------------
+def sitemap(data):
+
+    # Read the SITEMAP file from the object storage
+    # The format of the file expected is a txt file. Each line contains a full URI.
+    # Transforms all the links in PDF and reupload them as PDF in the same object storage
+
+    namespace = value["data"]["additionalDetails"]["namespace"]
+    bucketName = value["data"]["additionalDetails"]["bucketName"]
+    resourceName = value["data"]["resourceName"]
+
+    os_client = oci.object_storage.ObjectStorageClient(config = {}, signer=signer)
+    resp = os_client.get_object(namespace_name=namespace, bucket_name=bucketName, object_name=resourceName)
+    file_name = LOG_DIR+"/"+UNIQUE_ID+".sitemap"
+    with open(file_name, 'wb') as f:
+        for chunk in resp.data.raw.stream(1024 * 1024, decode_content=False):
+            f.write(chunk)
+
+    try:
+        with open(file_name, 'r') as f:
+            for line in f:
+                try:
+                    line = line.strip()  # Remove leading/trailing whitespace
+                    # Handle empty lines gracefully
+                    if not line:
+                        continue
+
+                    full_uri = line
+
+                    # Print the filename with the ".pdf" extension
+                    pdf_path = full_uri
+                    # Remove trailing /
+                    last_char = pdf_path[-1:]
+                    if last_char == '/':
+                        pdf_path = pdf_path[:-1]
+
+                    pdf_path = pdf_path.replace('https://', '');
+                    pdf_path = pdf_path.replace('/', '_');
+                    pdf_path = pdf_path.replace('.', '_');
+                    pdf_path = pdf_path.replace('-', '_');
+                    pdf_path = pdf_path+'.pdf'
+                    print(f"<sitemap>{full_uri}")
+                    pdfkit.from_url(full_uri, LOG_DIR+"/"+pdf_path)
+                    print(f"<sitemap>{pdf_path} created")
+
+                    # Upload to object storage as "site/"+pdf_path
+                    with open(LOG_DIR+"/"+pdf_path, 'rb') as f2:
+                        obj = os_client.put_object(namespace_name=namespace, bucket_name=bucketName, object_name="site/"+pdf_path, put_object_body=f2)
+                except Exception as e:
+                    print(f"<sitemap>Error parsing line: {line} in {resourceName}")
+    except FileNotFoundError as e:
+        print(f"<sitemap>Error: File '{file_name}' not found.")
+    except Exception as e:
+        print(f"<sitemap>An unexpected error occurred: {e}")
+
 ## -- decodeJson ------------------------------------------------------------------
 
 def decodeJson(value):
