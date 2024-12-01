@@ -250,7 +250,7 @@ def llama_chat(messages):
     body = { 
         "compartmentId": compartmentId,
         "servingMode": {
-            "modelId": "meta.llama-3-70b-instruct",
+            "modelId": "meta.llama-3.1-70b-instruct",
             "servingType": "ON_DEMAND"
         },
         "chatRequest": {
@@ -292,7 +292,7 @@ def cohere_chat(prompt, chatHistory, documents):
     body = { 
         "compartmentId": compartmentId,
         "servingMode": {
-            "modelId": "cohere.command-r-16k",
+            "modelId": "cohere.command-r-plus-08-2024",
             "servingType": "ON_DEMAND"
         },
         "chatRequest": {
