@@ -4,6 +4,8 @@ import json
 import requests
 import oci
 from datetime import datetime
+import pdfkit
+import pathlib
 
 # Constant
 LOG_DIR = '/tmp/app_log'
@@ -158,8 +160,6 @@ def generateText(prompt):
     log( "<generateText>")
     compartmentId = os.getenv("TF_VAR_compartment_ocid")
     endpoint = 'https://inference.generativeai.us-chicago-1.oci.oraclecloud.com/20231130/actions/generateText'
-    #         "modelId": "ocid1.generativeaimodel.oc1.us-chicago-1.amaaaaaask7dceyafhwal37hxwylnpbcncidimbwteff4xha77n5xz4m7p6a",
-    #         "modelId": "cohere.command-r-16k",
     body = {
         "compartmentId": compartmentId,
         "servingMode": {
@@ -196,8 +196,6 @@ def llama_chat2(prompt):
     log( "<llama_chat2>")
     compartmentId = os.getenv("TF_VAR_compartment_ocid")
     endpoint = 'https://inference.generativeai.eu-frankfurt-1.oci.oraclecloud.com/20231130/actions/chat'
-    #         "modelId": "ocid1.generativeaimodel.oc1.us-chicago-1.amaaaaaask7dceyafhwal37hxwylnpbcncidimbwteff4xha77n5xz4m7p6a",
-    #         "modelId": "cohere.command-r-16k",
     body = { 
         "compartmentId": compartmentId,
         "servingMode": {
@@ -246,7 +244,7 @@ def llama_chat(messages):
     compartmentId = os.getenv("TF_VAR_compartment_ocid")
     endpoint = 'https://inference.generativeai.us-chicago-1.oci.oraclecloud.com/20231130/actions/chat'
     #         "modelId": "ocid1.generativeaimodel.oc1.us-chicago-1.amaaaaaask7dceyafhwal37hxwylnpbcncidimbwteff4xha77n5xz4m7p6a",
-    #         "modelId": "cohere.command-r-16k",
+    #         "modelId": "cohere.command-r-plus-08-2024",
     body = { 
         "compartmentId": compartmentId,
         "servingMode": {
@@ -288,7 +286,7 @@ def cohere_chat(prompt, chatHistory, documents):
     compartmentId = os.getenv("TF_VAR_compartment_ocid")
     endpoint = 'https://inference.generativeai.us-chicago-1.oci.oraclecloud.com/20231130/actions/chat'
     #         "modelId": "ocid1.generativeaimodel.oc1.us-chicago-1.amaaaaaask7dceyafhwal37hxwylnpbcncidimbwteff4xha77n5xz4m7p6a",
-    #         "modelId": "cohere.command-r-16k",
+    #         "modelId": "cohere.command-r-plus-08-2024",
     body = { 
         "compartmentId": compartmentId,
         "servingMode": {
@@ -371,7 +369,7 @@ def summarizeContent(value,content):
     body = {
         "input" : content,
         "servingMode" : {
-            "modelId" : "cohere.command",
+            "modelId" : "cohere.command-r-plus-08-2024",
             "servingType" : "ON_DEMAND"
         },
         "temperature" : 1,
@@ -591,15 +589,18 @@ def documentUnderstanding(value):
     log( "</documentUnderstanding>")
 
 ## -- sitemap ------------------------------------------------------------------
-def sitemap(data):
+def sitemap(value):
 
     # Read the SITEMAP file from the object storage
     # The format of the file expected is a txt file. Each line contains a full URI.
     # Transforms all the links in PDF and reupload them as PDF in the same object storage
-
+    log( "<sitemap>")
     namespace = value["data"]["additionalDetails"]["namespace"]
     bucketName = value["data"]["additionalDetails"]["bucketName"]
     resourceName = value["data"]["resourceName"]
+    resourceNameWoExt = str(pathlib.Path(resourceName).with_suffix(''))
+    prefix="site/"+resourceNameWoExt
+    fileList = []
 
     os_client = oci.object_storage.ObjectStorageClient(config = {}, signer=signer)
     resp = os_client.get_object(namespace_name=namespace, bucket_name=bucketName, object_name=resourceName)
@@ -607,6 +608,7 @@ def sitemap(data):
     with open(file_name, 'wb') as f:
         for chunk in resp.data.raw.stream(1024 * 1024, decode_content=False):
             f.write(chunk)
+
 
     try:
         with open(file_name, 'r') as f:
@@ -630,20 +632,40 @@ def sitemap(data):
                     pdf_path = pdf_path.replace('/', '_');
                     pdf_path = pdf_path.replace('.', '_');
                     pdf_path = pdf_path.replace('-', '_');
+                    pdf_path = pdf_path.replace('?', '_');
+                    pdf_path = pdf_path.replace('=', '_');
+                    pdf_path = pdf_path.replace('&', '_');                    
                     pdf_path = pdf_path+'.pdf'
-                    print(f"<sitemap>{full_uri}")
+                    log("<sitemap>"+full_uri)
                     pdfkit.from_url(full_uri, LOG_DIR+"/"+pdf_path)
-                    print(f"<sitemap>{pdf_path} created")
-
+                    log("<sitemap>Created: "+pdf_path)
+ 
                     # Upload to object storage as "site/"+pdf_path
                     with open(LOG_DIR+"/"+pdf_path, 'rb') as f2:
-                        obj = os_client.put_object(namespace_name=namespace, bucket_name=bucketName, object_name="site/"+pdf_path, put_object_body=f2)
+                        obj = os_client.put_object(namespace_name=namespace, bucket_name=bucketName, object_name=prefix+"/"+pdf_path, put_object_body=f2)
+                        fileList.append( prefix+"/"+pdf_path )
+                    
                 except Exception as e:
-                    print(f"<sitemap>Error parsing line: {line} in {resourceName}")
+                    log("<sitemap>Error parsing line: "+line+" in "+resourceName)
+                    log("<sitemap>Exception:" + e)
+
+        # Check if there are file that are in the folder and not in the sitemap
+        response = os_client.list_objects( namespace_name=namespace, bucket_name=bucketName, prefix=prefix, retry_strategy=oci.retry.DEFAULT_RETRY_STRATEGY, limit=1000 )
+        for object_file in response.data.objects:
+            f = object_file.name
+            if f in fileList:
+                fileList.remove(f)
+            else: 
+                log( "<sitemap>Deleting: " + f )
+                os_client.delete_object( namespace_name=namespace, bucket_name=bucketName, object_name=f )
+                log( "<sitemap>Deleted: " + f )
+
     except FileNotFoundError as e:
-        print(f"<sitemap>Error: File '{file_name}' not found.")
+        log("<sitemap>Error: File not found= "+file_name)
     except Exception as e:
-        print(f"<sitemap>An unexpected error occurred: {e}")
+        log("<sitemap>An unexpected error occurred: " + e)
+    log( "</sitemap>")
+
 
 ## -- decodeJson ------------------------------------------------------------------
 

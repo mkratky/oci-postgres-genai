@@ -8,6 +8,11 @@ sudo dnf install -y python39 python39-devel
 sudo pip3.9 install pip --upgrade
 pip3.9 install -r requirements.txt
 
+# PDFKIT
+wget https://github.com/wkhtmltopdf/packaging/releases/download/0.12.6-1/wkhtmltox-0.12.6-1.centos8.x86_64.rpm
+sudo dnf localinstall -y wkhtmltox-0.12.6-1.centos8.x86_64.rpm
+mv *.rpm /tmp
+
 # Store the db_connection in the start.sh
 
 # Get COMPARTMENT_OCID

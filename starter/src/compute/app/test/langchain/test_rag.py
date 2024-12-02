@@ -35,7 +35,7 @@ Question: {question}
 prompt = PromptTemplate.from_template(template)
 
 llm = OCIGenAI(
-    model_id="cohere.command",
+    model_id="cohere.command-r-plus-08-2024",
     service_endpoint="https://inference.generativeai.us-chicago-1.oci.oraclecloud.com",
     compartment_id=compartmentId,
     auth_type="INSTANCE_PRINCIPAL",

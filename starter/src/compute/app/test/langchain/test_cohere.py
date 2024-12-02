@@ -7,7 +7,7 @@ oci_signer = oci.auth.signers.InstancePrincipalsSecurityTokenSigner() #preferred
 compartmentId = os.getenv("TF_VAR_compartment_ocid")
 
 llm = OCIGenAI(
-    model_id="cohere.command",
+    model_id="cohere.command-r-plus-08-2024",
     service_endpoint="https://inference.generativeai.us-chicago-1.oci.oraclecloud.com",
     compartment_id=compartmentId,
     auth_type="INSTANCE_PRINCIPAL",
