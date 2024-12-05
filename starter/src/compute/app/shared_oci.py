@@ -6,6 +6,7 @@ import oci
 from datetime import datetime
 import pdfkit
 import pathlib
+from oci.object_storage.transfer.constants import MEBIBYTE
 
 # Constant
 LOG_DIR = '/tmp/app_log'
@@ -609,7 +610,6 @@ def sitemap(value):
         for chunk in resp.data.raw.stream(1024 * 1024, decode_content=False):
             f.write(chunk)
 
-
     try:
         with open(file_name, 'r') as f:
             for line in f:
@@ -628,13 +628,14 @@ def sitemap(value):
                     if last_char == '/':
                         pdf_path = pdf_path[:-1]
 
-                    pdf_path = pdf_path.replace('https://', '');
-                    pdf_path = pdf_path.replace('/', '_');
-                    pdf_path = pdf_path.replace('.', '_');
-                    pdf_path = pdf_path.replace('-', '_');
-                    pdf_path = pdf_path.replace('?', '_');
-                    pdf_path = pdf_path.replace('=', '_');
-                    pdf_path = pdf_path.replace('&', '_');                    
+                    pdf_path = pdf_path.replace('/', '___');
+                    # pdf_path = pdf_path.replace('https://', '');
+                    # pdf_path = pdf_path.replace('/', '_');
+                    # pdf_path = pdf_path.replace('.', '_');
+                    # pdf_path = pdf_path.replace('-', '_');
+                    # pdf_path = pdf_path.replace('?', '_');
+                    # pdf_path = pdf_path.replace('=', '_');
+                    # pdf_path = pdf_path.replace('&', '_');                    
                     pdf_path = pdf_path+'.pdf'
                     log("<sitemap>"+full_uri)
                     pdfkit.from_url(full_uri, LOG_DIR+"/"+pdf_path)
@@ -647,7 +648,7 @@ def sitemap(value):
                     
                 except Exception as e:
                     log("<sitemap>Error parsing line: "+line+" in "+resourceName)
-                    log("<sitemap>Exception:" + e)
+                    log("<sitemap>Exception:" + str(e))
 
         # Check if there are file that are in the folder and not in the sitemap
         response = os_client.list_objects( namespace_name=namespace, bucket_name=bucketName, prefix=prefix, retry_strategy=oci.retry.DEFAULT_RETRY_STRATEGY, limit=1000 )
@@ -663,7 +664,7 @@ def sitemap(value):
     except FileNotFoundError as e:
         log("<sitemap>Error: File not found= "+file_name)
     except Exception as e:
-        log("<sitemap>An unexpected error occurred: " + e)
+        log("<sitemap>An unexpected error occurred: " + str(e))
     log( "</sitemap>")
 
 
@@ -732,3 +733,50 @@ def decodeJson(value):
         }
     log( "</decodeJson>")
     return result
+
+## -- upload_genai_bucket ------------------------------------------------------------------
+
+def upload_genai_bucket(value, content):
+
+    log( "<upload_genai_bucket>")
+    namespace = value["data"]["additionalDetails"]["namespace"]
+    bucketName = value["data"]["additionalDetails"]["bucketName"]
+    bucketGenAI = bucketName.replace("-public-bucket","-agent-bucket")
+    resourceName = value["data"]["resourceName"]
+    resourceGenAI = resourceName
+
+    os_client = oci.object_storage.ObjectStorageClient(config = {}, signer=signer)
+    file_name = LOG_DIR+"/"+UNIQUE_ID+".tmp"
+    if not content:
+        resp = os_client.get_object(namespace_name=namespace, bucket_name=bucketName, object_name=resourceName)
+        with open(file_name, 'wb') as f:
+            for chunk in resp.data.raw.stream(1024 * 1024, decode_content=False):
+                f.write(chunk)
+    else:
+        with open(file_name, 'w') as f:
+            f.write(content)
+        resourceGenAI = resourceGenAI + ".convert.txt"
+
+    upload_manager = oci.object_storage.UploadManager(os_client, max_parallel_uploads=10)
+    part_size = 2 * MEBIBYTE
+    upload_manager.upload_file(namespace_name=namespace, bucket_name=bucketGenAI, object_name=resourceGenAI, filename=file_name, part_size=part_size)
+    log( "</upload_genai_bucket>")            
+
+## -- delete_genai_bucket ------------------------------------------------------------------
+
+def delete_genai_bucket(value, content):
+
+    log( "<delete_genai_bucket>")
+    namespace = value["data"]["additionalDetails"]["namespace"]
+    bucketName = value["data"]["additionalDetails"]["bucketName"]
+    bucketGenAI = bucketName.replace("-public-bucket","-agent-bucket")
+    resourceName = value["data"]["resourceName"]
+    resourceGenAI = resourceName
+
+    os_client = oci.object_storage.ObjectStorageClient(config = {}, signer=signer)
+    if content:
+        resourceGenAI = resourceGenAI + ".convert.txt"
+
+    os_client.delete_object(namespace_name=namespace, bucket_name=bucketGenAI, object_name=resourceName)
+    log( "</delete_genai_bucket>")             
+
