@@ -10,3 +10,4 @@ export FN_OCID="##FN_OCID##"
 export FN_INVOKE_ENDPOINT="##FN_INVOKE_ENDPOINT##"
 export TF_VAR_compartment_ocid=`curl -s -H "Authorization: Bearer Oracle" -L http://169.254.169.254/opc/v2/instance/ | jq -r .compartmentId`
 export TF_VAR_region=`curl -s -H "Authorization: Bearer Oracle" -L http://169.254.169.254/opc/v2/instance/ | jq -r .canonicalRegionName`
+export TF_VAR_agent_datasource_ocid="##AGENT_DATASOURCE_OCID##"

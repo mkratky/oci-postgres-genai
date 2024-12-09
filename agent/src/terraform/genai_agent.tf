@@ -80,4 +80,3 @@ resource "oci_generative_ai_agent_agent_endpoint" "starter_agent_endpoint" {
   }
   freeform_tags = local.freeform_tags  
 }
-
