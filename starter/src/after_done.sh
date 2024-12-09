@@ -17,7 +17,8 @@ get_attribute_from_tfstate "FN_INVOKE_ENDPOINT" "starter_fn_function" "invoke_en
 
 get_id_from_tfstate "AGENT_DATASOURCE_OCID" "starter_agent_ds" 
 
-get_id_from_tfstate "PRIVATE_SUBNET_OCID" "starter_private_subnet" 
+get_id_from_tfstate "APP_SUBNET_OCID" "starter_app_subnet" 
+get_id_from_tfstate "DB_SUBNET_OCID" "starter_db_subnet" 
 
 echo 
 echo "--------------------------"

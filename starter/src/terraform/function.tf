@@ -3,7 +3,7 @@ resource "oci_functions_application" "starter_fn_application" {
   #Required
   compartment_id = local.lz_appdev_cmp_ocid
   display_name   = "${var.prefix}-fn-application"
-  subnet_ids     = [data.oci_core_subnet.starter_private_subnet.id]
+  subnet_ids     = [data.oci_core_subnet.starter_app_subnet.id]
 
   image_policy_config {
     #Required

@@ -103,7 +103,8 @@ if declare -p | grep -q "__TO_FILL__"; then
   # OCIDs
   read_ocid TF_VAR_vcn_ocid "Virtual Cloud Network (VCN)" ocid1.vcn 
   read_ocid TF_VAR_public_subnet_ocid "Public Subnet" ocid1.subnet
-  read_ocid TF_VAR_private_subnet_ocid "Private Subnet" ocid1.subnet
+  read_ocid TF_VAR_app_subnet_ocid "Application Subnet" ocid1.subnet
+  read_ocid TF_VAR_db_subnet_ocid "Database Subnet" ocid1.subnet
   read_ocid TF_VAR_oke_ocid "Kubernetes Cluster (OKE)" ocid1.cluster
   read_ocid TF_VAR_atp_ocid "Autonomous Datababase" ocid1.autonomousdatabase
   read_ocid TF_VAR_db_ocid "Base Database" ocid1.dbsystem

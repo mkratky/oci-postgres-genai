@@ -349,11 +349,13 @@ livelabs_green_button() {
     echo TF_VAR_subnet_ocid=$TF_VAR_subnet_ocid  
     if [ "$TF_VAR_subnet_ocid" != "" ]; then
       sed -i "s&TF_VAR_public_subnet_ocid=\"__TO_FILL__\"&TF_VAR_public_subnet_ocid=\"$TF_VAR_subnet_ocid\"&" $PROJECT_DIR/env.sh
-      sed -i "s&TF_VAR_private_subnet_ocid=\"__TO_FILL__\"&TF_VAR_private_subnet_ocid=\"$TF_VAR_subnet_ocid\"&" $PROJECT_DIR/env.sh
+      sed -i "s&TF_VAR_app_subnet_ocid=\"__TO_FILL__\"&TF_VAR_app_subnet_ocid=\"$TF_VAR_subnet_ocid\"&" $PROJECT_DIR/env.sh
+      sed -i "s&TF_VAR_db_subnet_ocid=\"__TO_FILL__\"&TF_VAR_db_subnet_ocid=\"$TF_VAR_subnet_ocid\"&" $PROJECT_DIR/env.sh
       echo "TF_VAR_subnet_ocid stored in env.sh"
       # Set the real variables such that the first "build" works too.
       export TF_VAR_public_subnet_ocid=$TF_VAR_subnet_ocid
-      export TF_VAR_private_subnet_ocid=$TF_VAR_subnet_ocid
+      export TF_VAR_app_subnet_ocid=$TF_VAR_subnet_ocid
+      export TF_VAR_db_subnet_ocid=$TF_VAR_subnet_ocid      
     fi  
     
     # LiveLabs support only E4 Shapes

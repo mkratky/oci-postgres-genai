@@ -45,11 +45,11 @@ resource "oci_core_subnet" "starter_public_subnet" {
   freeform_tags     = local.freeform_tags
 }
 
-# Private Subnet
-resource "oci_core_subnet" "starter_private_subnet" {
+# App Subnet
+resource "oci_core_subnet" "starter_app_subnet" {
   cidr_block        = local.cidr_private_subnet
-  display_name      = "${var.prefix}-priv-subnet"
-  dns_label         = "${var.prefix}priv"
+  display_name      = "${var.prefix}-app-subnet"
+  dns_label         = "${var.prefix}app"
   security_list_ids = [oci_core_vcn.starter_vcn.default_security_list_id, oci_core_security_list.starter_security_list.id]
   compartment_id    = local.lz_network_cmp_ocid
   vcn_id            = oci_core_vcn.starter_vcn.id
@@ -58,6 +58,21 @@ resource "oci_core_subnet" "starter_private_subnet" {
   freeform_tags     = local.freeform_tags
   prohibit_public_ip_on_vnic = true
 }
+
+# Db Subnet
+resource "oci_core_subnet" "starter_db_subnet" {
+  cidr_block        = local.cidr_private_subnet
+  display_name      = "${var.prefix}-db-subnet"
+  dns_label         = "${var.prefix}db"
+  security_list_ids = [oci_core_vcn.starter_vcn.default_security_list_id, oci_core_security_list.starter_security_list.id]
+  compartment_id    = local.lz_network_cmp_ocid
+  vcn_id            = oci_core_vcn.starter_vcn.id
+  route_table_id    = oci_core_route_table.starter_route_private.id
+  dhcp_options_id   = oci_core_vcn.starter_vcn.default_dhcp_options_id
+  freeform_tags     = local.freeform_tags
+  prohibit_public_ip_on_vnic = true
+}
+
 
 resource "oci_core_security_list" "starter_security_list" {
   compartment_id = local.lz_network_cmp_ocid
@@ -217,8 +232,12 @@ data "oci_core_subnet" "starter_public_subnet" {
   subnet_id = oci_core_subnet.starter_public_subnet.id
 }
 
-data "oci_core_subnet" "starter_private_subnet" {
-  subnet_id = oci_core_subnet.starter_private_subnet.id
+data "oci_core_subnet" "starter_app_subnet" {
+  subnet_id = oci_core_subnet.starter_app_subnet.id
+} 
+
+data "oci_core_subnet" "starter_db_subnet" {
+  subnet_id = oci_core_subnet.starter_db_subnet.id
 } 
 
 # NAT Gateway
