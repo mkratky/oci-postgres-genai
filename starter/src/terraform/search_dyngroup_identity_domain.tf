@@ -39,7 +39,7 @@ resource "oci_identity_policy" "starter_search_policy" {
     depends_on     = [ time_sleep.wait_30_seconds ]
     name           = "${var.prefix}-policy"
     description    = "${var.prefix} policy"
-    compartment_id = local.lz_app_cmp_ocid
+    compartment_id = local.lz_serv_cmp_ocid
 
     statements = [
         "Allow dynamic-group ${var.prefix}-fn-dyngroup to manage objects in compartment id ${local.lz_serv_cmp_ocid}",
