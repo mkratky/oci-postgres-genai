@@ -64,6 +64,7 @@ build_function() {
      . ../../env.sh
      # Push the image to docker
      docker login ${TF_VAR_ocir} -u ${TF_VAR_namespace}/${TF_VAR_username} -p "${TF_VAR_auth_token}"
+     exit_on_error
      docker push $TF_VAR_fn_image
      exit_on_error
   else 
@@ -92,11 +93,9 @@ ocir_docker_push () {
   # Push image in registry
   docker tag ${TF_VAR_prefix}-app ${DOCKER_PREFIX}/${TF_VAR_prefix}-app:latest
   docker push ${DOCKER_PREFIX}/${TF_VAR_prefix}-app:latest
-  exit_on_error
 
   docker tag ${TF_VAR_prefix}-ui ${DOCKER_PREFIX}/${TF_VAR_prefix}-ui:latest
   docker push ${DOCKER_PREFIX}/${TF_VAR_prefix}-ui:latest
-  exit_on_error
 }
 
 replace_db_user_password_in_file() {
@@ -302,9 +301,9 @@ is_deploy_compute() {
 }
 
 livelabs_green_button() {
-  # Lot of tests to be sure we are in an Green Button LiveLabs
+  # Lot of tests to be sure we are in a empty Green Button LiveLabs
   # compartment_ocid still undefined ? 
-  if grep -q 'export TF_VAR_compartment_ocid="__TO_FILL__"' $PROJECT_DIR/env.sh; then
+  if grep -q '# export TF_VAR_compartment_ocid=ocid1.compartment.xxxxx' $PROJECT_DIR/env.sh; then
     # vnc_ocid still undefined ? 
     if [ "$TF_VAR_vcn_ocid" != "__TO_FILL__" ]; then
       # Variables already set
@@ -337,7 +336,7 @@ livelabs_green_button() {
     echo TF_VAR_compartment_ocid=$TF_VAR_compartment_ocid
 
     if [ "$TF_VAR_compartment_ocid" != "" ]; then
-      sed -i "s&export TF_VAR_compartment_ocid=\"__TO_FILL__\"&export TF_VAR_compartment_ocid=\"$TF_VAR_compartment_ocid\"&" $PROJECT_DIR/env.sh
+      sed -i "s&# export TF_VAR_compartment_ocid=ocid1.compartment.xxxxx&export TF_VAR_compartment_ocid=\"$TF_VAR_compartment_ocid\"&" $PROJECT_DIR/env.sh
       echo "TF_VAR_compartment_ocid stored in env.sh"
     fi  
 
@@ -352,11 +351,13 @@ livelabs_green_button() {
     echo TF_VAR_subnet_ocid=$TF_VAR_subnet_ocid  
     if [ "$TF_VAR_subnet_ocid" != "" ]; then
       sed -i "s&TF_VAR_public_subnet_ocid=\"__TO_FILL__\"&TF_VAR_public_subnet_ocid=\"$TF_VAR_subnet_ocid\"&" $PROJECT_DIR/env.sh
-      sed -i "s&TF_VAR_private_subnet_ocid=\"__TO_FILL__\"&TF_VAR_private_subnet_ocid=\"$TF_VAR_subnet_ocid\"&" $PROJECT_DIR/env.sh
+      sed -i "s&TF_VAR_app_subnet_ocid=\"__TO_FILL__\"&TF_VAR_app_subnet_ocid=\"$TF_VAR_subnet_ocid\"&" $PROJECT_DIR/env.sh
+      sed -i "s&TF_VAR_db_subnet_ocid=\"__TO_FILL__\"&TF_VAR_db_subnet_ocid=\"$TF_VAR_subnet_ocid\"&" $PROJECT_DIR/env.sh
       echo "TF_VAR_subnet_ocid stored in env.sh"
       # Set the real variables such that the first "build" works too.
       export TF_VAR_public_subnet_ocid=$TF_VAR_subnet_ocid
-      export TF_VAR_private_subnet_ocid=$TF_VAR_subnet_ocid
+      export TF_VAR_app_subnet_ocid=$TF_VAR_subnet_ocid
+      export TF_VAR_db_subnet_ocid=$TF_VAR_subnet_ocid      
     fi  
     
     # LiveLabs support only E4 Shapes
