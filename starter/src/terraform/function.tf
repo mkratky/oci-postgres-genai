@@ -1,7 +1,7 @@
    
 resource "oci_functions_application" "starter_fn_application" {
   #Required
-  compartment_id = local.lz_appdev_cmp_ocid
+  compartment_id = local.lz_app_cmp_ocid
   display_name   = "${var.prefix}-fn-application"
   subnet_ids     = [data.oci_core_subnet.starter_app_subnet.id]
 
@@ -74,10 +74,10 @@ resource "oci_identity_policy" "starter_fn_policy" {
   provider       = oci.home    
   name           = "${var.prefix}-fn-policy"
   description    = "APIGW access Function"
-  compartment_id = local.lz_appdev_cmp_ocid
+  compartment_id = local.lz_app_cmp_ocid
   statements = [
-    # "ALLOW any-user to use functions-family in compartment id ${local.lz_appdev_cmp_ocid} where ALL {request.principal.type= 'ApiGateway', request.resource.compartment.id = '${local.lz_appdev_cmp_ocid}'}"
-    "ALLOW any-user to use functions-family in compartment id ${local.lz_appdev_cmp_ocid} where ALL {request.principal.type= 'ApiGateway'}"
+    # "ALLOW any-user to use functions-family in compartment id ${local.lz_app_cmp_ocid} where ALL {request.principal.type= 'ApiGateway', request.resource.compartment.id = '${local.lz_app_cmp_ocid}'}"
+    "ALLOW any-user to use functions-family in compartment id ${local.lz_app_cmp_ocid} where ALL {request.principal.type= 'ApiGateway'}"
   ]
 
   freeform_tags = local.freeform_tags

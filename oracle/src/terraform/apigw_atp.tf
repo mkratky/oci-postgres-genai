@@ -1,5 +1,5 @@
 resource oci_apigateway_gateway starter_apigw_public {
-  compartment_id = local.lz_appdev_cmp_ocid
+  compartment_id = local.lz_web_cmp_ocid
   display_name  = "${var.prefix}-apigw-public"
   endpoint_type = "PUBLIC" 
   subnet_id = data.oci_core_subnet.starter_public_subnet.id
@@ -16,7 +16,7 @@ output db_root_url {
 
 
 resource "oci_apigateway_deployment" "starter_apigw_public_deployment" {
-  compartment_id = local.lz_appdev_cmp_ocid
+  compartment_id = local.lz_web_cmp_ocid
   display_name   = "${var.prefix}-apigw-public-deployment"
   gateway_id     = oci_apigateway_gateway.starter_apigw_public.id
   path_prefix    = "/"

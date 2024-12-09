@@ -11,7 +11,7 @@ resource "oci_objectstorage_bucket" "starter_agent_bucket" {
 
 resource "oci_generative_ai_agent_knowledge_base" "starter_agent_kb" {
   #Required
-  compartment_id                 = local.lz_appdev_cmp_ocid
+  compartment_id                 = local.lz_serv_cmp_ocid
   index_config  {
     index_config_type = "DEFAULT_INDEX_CONFIG"
     should_enable_hybrid_search   = "true"
@@ -24,7 +24,7 @@ resource "oci_generative_ai_agent_knowledge_base" "starter_agent_kb" {
 # -- DataSource ---------------------------------------------------------
 
 resource "oci_generative_ai_agent_data_source" "starter_agent_ds" {
-  compartment_id                 = local.lz_appdev_cmp_ocid
+  compartment_id                 = local.lz_serv_cmp_ocid
   knowledge_base_id              = oci_generative_ai_agent_knowledge_base.starter_agent_kb.id
   data_source_config  {
     data_source_config_type = "OCI_OBJECT_STORAGE"
@@ -42,7 +42,7 @@ resource "oci_generative_ai_agent_data_source" "starter_agent_ds" {
 
 resource "oci_generative_ai_agent_data_ingestion_job" "starter_agent_ingestion_job" {
   #Required
-  compartment_id                 = local.lz_appdev_cmp_ocid
+  compartment_id                 = local.lz_serv_cmp_ocid
   data_source_id                 = oci_generative_ai_agent_data_source.starter_agent_ds.id
   display_name                  = "${var.prefix}-agent-ingestion-job"
   description                   = "${var.prefix}-agent-ingestion-job"
@@ -52,7 +52,7 @@ resource "oci_generative_ai_agent_data_ingestion_job" "starter_agent_ingestion_j
 # -- Agent ---------------------------------------------------------
 
 resource "oci_generative_ai_agent_agent" "starter_agent" {
-  compartment_id                 = local.lz_appdev_cmp_ocid
+  compartment_id                 = local.lz_serv_cmp_ocid
   display_name                  = "${var.prefix}-agent"
   description                   = "${var.prefix}-agent"
   knowledge_base_ids = [
@@ -64,7 +64,7 @@ resource "oci_generative_ai_agent_agent" "starter_agent" {
 # -- Agent Endpoint ---------------------------------------------------------
 
 resource "oci_generative_ai_agent_agent_endpoint" "starter_agent_endpoint" {
-  compartment_id                 = local.lz_appdev_cmp_ocid
+  compartment_id                 = local.lz_serv_cmp_ocid
   agent_id                       = oci_generative_ai_agent_agent.starter_agent.id
   display_name                  = "${var.prefix}-agent-endpoint"
   description                   = "${var.prefix}-agent-endpoint"

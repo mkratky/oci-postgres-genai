@@ -16,7 +16,7 @@ resource "oci_identity_domains_dynamic_resource_group" "search-fn-dyngroup" {
     provider       = oci.home    
     display_name = "${var.prefix}-fn-dyngroup"
     idcs_endpoint = local.idcs_url
-    matching_rule = "ALL {resource.type = 'fnfunc', resource.compartment.id = '${var.compartment_ocid}'}"
+    matching_rule = "ALL {resource.type = 'fnfunc', resource.compartment.id = '${local.lz_app_cmp_ocid}'}"
     schemas = ["urn:ietf:params:scim:schemas:oracle:idcs:DynamicResourceGroup"]
 }
 
@@ -39,12 +39,12 @@ resource "oci_identity_policy" "starter_search_policy" {
     depends_on     = [ time_sleep.wait_30_seconds ]
     name           = "${var.prefix}-policy"
     description    = "${var.prefix} policy"
-    compartment_id = local.lz_appdev_cmp_ocid
+    compartment_id = local.lz_app_cmp_ocid
 
     statements = [
-        "Allow dynamic-group ${var.prefix}-fn-dyngroup to manage objects in compartment id ${var.compartment_ocid}",
-        "Allow dynamic-group ${var.prefix}-bastion-dyngroup to manage all-resources in compartment id ${var.compartment_ocid}",
-        "Allow dynamic-group ${var.prefix}-bastion-dyngroup to manage stream-family in compartment id ${var.compartment_ocid}"
+        "Allow dynamic-group ${var.prefix}-fn-dyngroup to manage objects in compartment id ${local.lz_serv_cmp_ocid}",
+        "Allow dynamic-group ${var.prefix}-bastion-dyngroup to manage all-resources in compartment id ${local.lz_serv_cmp_ocid}",
+        "Allow dynamic-group ${var.prefix}-bastion-dyngroup to manage stream-family in compartment id ${local.lz_serv_cmp_ocid}"
         # "Allow dynamic-group ${var.idcs_domain_name}/${var.prefix}-fn-dyngroup to manage objects in compartment id ${var.compartment_ocid}",
         # "Allow dynamic-group ${var.idcs_domain_name}/${var.prefix}-bastion-dyngroup to manage all-resources in compartment id ${var.compartment_ocid}",
         # "Allow dynamic-group ${var.idcs_domain_name}/${var.prefix}-bastion-dyngroup to manage stream-family in compartment id ${var.compartment_ocid}"

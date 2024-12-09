@@ -4,7 +4,7 @@ variable "openapi_spec" {
 }
 
 resource oci_apigateway_gateway starter_apigw {
-  compartment_id = local.lz_appdev_cmp_ocid
+  compartment_id = local.lz_web_cmp_ocid
   display_name  = "${var.prefix}-apigw"
   endpoint_type = "PUBLIC"
   subnet_id = data.oci_core_subnet.starter_public_subnet.id
@@ -12,7 +12,7 @@ resource oci_apigateway_gateway starter_apigw {
 }
 
 resource "oci_apigateway_api" "starter_api" {
-  compartment_id = local.lz_appdev_cmp_ocid
+  compartment_id = local.lz_web_cmp_ocid
   content       = var.openapi_spec
   display_name  = "${var.prefix}-api"
   freeform_tags = local.freeform_tags   
@@ -45,7 +45,7 @@ locals {
 
 resource "oci_apigateway_deployment" "starter_apigw_deployment" {   
   count          = var.fn_image == "" ? 0 : 1   
-  compartment_id = local.lz_appdev_cmp_ocid
+  compartment_id = local.lz_web_cmp_ocid
   display_name   = "${var.prefix}-apigw-deployment"
   gateway_id     = local.apigw_ocid
   path_prefix    = "/app"
