@@ -361,24 +361,30 @@ def summarizeContent(value,content):
     log( "<summarizeContent>")
     global signer
     compartmentId = value["data"]["compartmentId"]
-    endpoint = 'https://inference.generativeai.us-chicago-1.oci.oraclecloud.com/20231130/actions/summarizeText'
+    endpoint = 'https://inference.generativeai.us-chicago-1.oci.oraclecloud.com/20231130/actions/chat'
     # Avoid Limit of 4096 Tokens
     if len(content) > 12000:
         log( "Truncating to 12000 characters")
         content = content[:12000]
 
-    body = {
-        "input" : content,
-        "servingMode" : {
-            "modelId" : "cohere.command-r-plus-08-2024",
-            "servingType" : "ON_DEMAND"
+    body = { 
+        "compartmentId": compartmentId,
+        "servingMode": {
+            "modelId": "cohere.command-r-plus-08-2024",
+            "servingType": "ON_DEMAND"
         },
-        "temperature" : 1,
-        "length" : "AUTO",
-        "extractiveness" : "AUTO",
-        "format" : "AUTO",
-        "additionalCommand" : "",
-        "compartmentId" : compartmentId
+        "chatRequest": {
+            "maxTokens": 4000,
+            "temperature": 0,
+            "preambleOverride": "",
+            "frequencyPenalty": 0,
+            "presencePenalty": 0,
+            "topP": 0.75,
+            "topK": 0,
+            "isStream": False,
+            "message": "Summarise the following text in 200 words.\n\n"+content,
+            "apiFormat": "COHERE"
+        }
     }
     try: 
         resp = requests.post(endpoint, json=body, auth=signer)
@@ -736,7 +742,7 @@ def decodeJson(value):
 
 ## -- upload_genai_bucket ------------------------------------------------------------------
 
-def upload_genai_bucket(value, content):
+def upload_genai_bucket(value, content=None):
 
     log( "<upload_genai_bucket>")
     namespace = value["data"]["additionalDetails"]["namespace"]
@@ -759,12 +765,12 @@ def upload_genai_bucket(value, content):
 
     upload_manager = oci.object_storage.UploadManager(os_client, max_parallel_uploads=10)
     part_size = 2 * MEBIBYTE
-    upload_manager.upload_file(namespace_name=namespace, bucket_name=bucketGenAI, object_name=resourceGenAI, filename=file_name, part_size=part_size)
+    upload_manager.upload_file(namespace_name=namespace, bucket_name=bucketGenAI, object_name=resourceGenAI, file_path=file_name, part_size=part_size)
     log( "</upload_genai_bucket>")            
 
 ## -- delete_genai_bucket ------------------------------------------------------------------
 
-def delete_genai_bucket(value, content):
+def delete_genai_bucket(value, content=None):
 
     log( "<delete_genai_bucket>")
     namespace = value["data"]["additionalDetails"]["namespace"]
@@ -777,6 +783,23 @@ def delete_genai_bucket(value, content):
     if content:
         resourceGenAI = resourceGenAI + ".convert.txt"
 
-    os_client.delete_object(namespace_name=namespace, bucket_name=bucketGenAI, object_name=resourceName)
+    os_client.delete_object(namespace_name=namespace, bucket_name=bucketGenAI, object_name=resourceGenAI)
     log( "</delete_genai_bucket>")             
 
+## -- genai_agent_datasource_ingest -----------------------------------------------------------
+
+def genai_agent_datasource_ingest():
+
+    log( "<genai_agent_datasource_ingest>")
+    compartmentId = os.getenv("TF_VAR_compartment_ocid")
+    datasourceId = os.getenv("TF_VAR_genai_agent_datasource_ocid")
+    dt = datetime.now().strftime("%d_%m_%Y_%H_%M_%S")
+    genai_agent_client = oci.generative_ai_agent.GenerativeAiAgentClient(config = {}, signer=signer)    
+    genai_agent_client.create_data_ingestion_job(
+        create_data_ingestion_job_details=oci.generative_ai_agent.models.CreateDataIngestionJobDetails(
+		    data_source_id=datasourceId,
+		    compartment_id=compartmentId,
+		    display_name="AUTO_INGESTION_" + dt,
+		    description="AUTO_INGESTION_" + dt
+        ))
+    log( "</genai_agent_datasource_ingest>")             

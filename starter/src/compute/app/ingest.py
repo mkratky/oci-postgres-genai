@@ -28,15 +28,18 @@ def stream_cursor(sc, sid, group_name, instance_name):
 ## -- stream_loop --------------------------------------------------------
 
 def stream_loop(client, stream_id, initial_cursor):
+    updateCount = 0
     cursor = initial_cursor
     while True:
         get_response = client.get_messages(stream_id, cursor, limit=10)
         # No messages to process. return.
         if not get_response.data:
+            document.updateCount( updateCount )
             return
 
         # Process the messages
         log("<stream_loop> Read {} messages".format(len(get_response.data)))
+        updateCount += len(get_response.data)
         for message in get_response.data:
             try:
                 log("--------------------------------------------------------------" )
@@ -73,7 +76,7 @@ def eventDocument(value):
     if eventType in ["com.oraclecloud.objectstorage.createobject", "com.oraclecloud.objectstorage.updateobject"]:
         document.insertDocument( value )
     elif eventType == "com.oraclecloud.objectstorage.deleteobject":
-        document.deleteDocument( resourceId )
+        document.deleteDocument( value )
 
 ## -- main ------------------------------------------------------------------
 

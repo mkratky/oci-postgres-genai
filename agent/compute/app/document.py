@@ -13,15 +13,14 @@ def getFileExtension(resourceName):
 ## -- insertDocument --------------------------------------------------------
 
 def insertDocument(value):
+    log( "<insertDocument>")
     resourceName = value["data"]["resourceName"]
     resourceExtension = getFileExtension(resourceName)
     log( "Extension:" + resourceExtension )
      
     # Content 
     result = { "content": "-" }
-    if resourceName.startswith("belgian"):
-        result = shared_oci.belgian(value)
-    elif resourceExtension in [".pdf", ".txt", ".csv", ".md"]:
+    if resourceExtension in [".pdf", ".txt", ".csv", ".md"]:
         shared_oci.upload_genai_bucket(value)
         return
     elif resourceExtension in [".png", ".jpg", ".jpeg", ".gif"]:
@@ -36,10 +35,6 @@ def insertDocument(value):
         shared_oci.speech(value)
         return
     elif resourceExtension in [".tif"]:
-        # This will create a JSON file in Object Storage that will create a second even with resourceExtension "json" 
-        shared_oci.documentUnderstanding(value)
-        return
-    elif resourceExtension in [".tif",".pdf"]:
         # This will create a JSON file in Object Storage that will create a second even with resourceExtension "json" 
         shared_oci.documentUnderstanding(value)
         return
@@ -60,36 +55,37 @@ def insertDocument(value):
        return 
 
     # Upload the GENAI Bucket
-    shared_oci.upload_genai_bucket(value, result["content"])
+    shared_oci.upload_genai_bucket(value, result["content"])    
+    log( "</insertDocument>")
 
-    result["source_type"] = "OBJECT_STORAGE"
-
-    # Summary 
-    if len(result["content"])>250:
-        result["summary"] = shared_oci.summarizeContent(value, result["content"])
-    else:    
-        result["summary"] = result["content"]
-    
-    # Delete Document in repository
-    deleteDocument( result["path"] )
-
-    # If no page, just add the content
-    if result.get("pages") == None:
-        result["pages"] = { "1": result["content"] }
-
-    shared_db.createDoc(result)        
-                
 ## -- deleteDocument --------------------------------------------------------
 
-def deleteDocument(resourceId):
+def deleteDocument(value):
+    log( "<deleteDocument>")
+    log( str(value) )
+    resourceId = value["data"]["resourceId"]
     resourceName = value["data"]["resourceName"]
     resourceExtension = getFileExtension(resourceName)
 
-    log( "<deleteDocument>")
     if resourceExtension in [".pdf", ".txt", ".csv", ".md"]:
         shared_oci.delete_genai_bucket(value)
     else:
-        shared_oci.delete_genai_bucket(value,"-")
-        
-    shared_db.deleteDoc(resourceId)
+        shared_oci.delete_genai_bucket(value,"-")        
     log( "</deleteDocument>")
+
+
+## -- updateCount ------------------------------------------------------------------
+
+countUpdate = 0
+
+def updateCount(count):
+    global countUpdate
+    if count>0:
+        countUpdate = countUpdate + count 
+    elif countUpdate>0:
+        try:
+            shared_oci.genai_agent_datasource_ingest()
+            log( "<updateCount>GenAI agent datasource ingest job created")
+            countUpdate = 0
+        except (Exception) as e:
+            log(f"<updateCount>ERROR: {e}")

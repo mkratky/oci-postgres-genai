@@ -7,6 +7,7 @@ import pathlib
 ## -- insertDocument --------------------------------------------------------
 
 def insertDocument(value):
+    log( "<insertDocument>")
     resourceName = value["data"]["resourceName"]
     lowerResourceName = resourceName.lower()
     resourceExtension = pathlib.Path(lowerResourceName).suffix
@@ -63,10 +64,17 @@ def insertDocument(value):
         result["pages"] = { "1": result["content"] }
 
     shared_db.createDoc(result)        
+    log( "</insertDocument>")
                 
 ## -- deleteDocument --------------------------------------------------------
 
-def deleteDocument(resourceId):
+def deleteDocument(value):
     log( "<deleteDocument>")
+    resourceId = value["data"]["resourceId"]
     shared_db.deleteDoc(resourceId)
     log( "</deleteDocument>")
+
+## -- updateCount ------------------------------------------------------------------
+
+def updateCount(count):
+    pass

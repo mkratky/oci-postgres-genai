@@ -42,9 +42,9 @@ resource "oci_identity_policy" "starter_search_policy" {
     compartment_id = local.lz_appdev_cmp_ocid
 
     statements = [
-        "Allow dynamic-group ${var.prefix}-fn-dyngroup to manage objects in compartment id ${var.compartment_ocid}",
-        "Allow dynamic-group ${var.prefix}-bastion-dyngroup to manage all-resources in compartment id ${var.compartment_ocid}",
-        "Allow dynamic-group ${var.prefix}-bastion-dyngroup to manage stream-family in compartment id ${var.compartment_ocid}"
+        "Allow dynamic-group ${var.idcs_domain_name}/${var.prefix}-fn-dyngroup to manage objects in compartment id ${var.compartment_ocid}",
+        "Allow dynamic-group ${var.idcs_domain_name}/${var.prefix}-bastion-dyngroup to manage all-resources in compartment id ${var.compartment_ocid}",
+        "Allow dynamic-group ${var.idcs_domain_name}/${var.prefix}-bastion-dyngroup to manage stream-family in compartment id ${var.compartment_ocid}"
         # "Allow dynamic-group ${var.idcs_domain_name}/${var.prefix}-fn-dyngroup to manage objects in compartment id ${var.compartment_ocid}",
         # "Allow dynamic-group ${var.idcs_domain_name}/${var.prefix}-bastion-dyngroup to manage all-resources in compartment id ${var.compartment_ocid}",
         # "Allow dynamic-group ${var.idcs_domain_name}/${var.prefix}-bastion-dyngroup to manage stream-family in compartment id ${var.compartment_ocid}"
