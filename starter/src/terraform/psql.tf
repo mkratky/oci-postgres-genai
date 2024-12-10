@@ -1,6 +1,6 @@
 // ------------------------ PostgreSQL -----------------------------   
 resource "oci_psql_db_system" "starter_psql" {
-  compartment_id      = local.lz_database_cmp_ocid
+  compartment_id      = local.lz_db_cmp_ocid
   instance_count = "1"
   system_type = "OCI_OPTIMIZED_STORAGE"
 

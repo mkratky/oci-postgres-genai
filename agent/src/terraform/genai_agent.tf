@@ -1,5 +1,5 @@
 resource "oci_objectstorage_bucket" "starter_agent_bucket" {
-  compartment_id = local.lz_security_cmp_ocid
+  compartment_id = local.lz_serv_cmp_ocid
   namespace      = var.namespace
   name           = "${var.prefix}-agent-bucket"
   object_events_enabled = true
