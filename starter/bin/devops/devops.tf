@@ -96,7 +96,7 @@ resource "oci_logging_log" "starter_devops_log" {
 # Used to run terraform from DevOps to keep the state in a fixed place
 # Not needed when using ResourceManager
 resource "oci_objectstorage_bucket" "starter_devops_bucket" {
-  compartment_id = var.compartment_ocid
+  compartment_id = local.lz_serv_cmp_ocid
   namespace      = local.ocir_namespace
   name           = "${var.prefix}-devops-bucket"
   access_type    = "NoPublicAccess"

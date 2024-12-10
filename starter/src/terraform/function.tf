@@ -89,7 +89,7 @@ resource "oci_identity_policy" "starter_fn_policy" {
 variable "namespace" {}
 
 resource "oci_objectstorage_bucket" "starter_bucket" {
-  compartment_id = local.lz_security_cmp_ocid
+  compartment_id = local.lz_serv_cmp_ocid
   namespace      = var.namespace
   name           = "${var.prefix}-public-bucket"
   access_type    = "ObjectReadWithoutList"
