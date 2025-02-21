@@ -303,7 +303,7 @@ def cohere_chat(prompt, chatHistory, documents):
             "topP": 0.75,
             "topK": 0,
             "isStream": False,
-            "message": prompt,
+            "message": "some message",
             "chatHistory": chatHistory,
             "documents": documents,
             "apiFormat": "COHERE"
