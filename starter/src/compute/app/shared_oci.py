@@ -164,7 +164,7 @@ def generateText(prompt):
     body = {
         "compartmentId": compartmentId,
         "servingMode": {
-            "modelId": "ocid1.generativeaimodel.oc1.us-chicago-1.amaaaaaask7dceyafhwal37hxwylnpbcncidimbwteff4xha77n5xz4m7p6a",
+            "modelId": "ocid1.generativeaimodel.oc1.us-chicago-1.amaaaaaask7dceyanrlpnq5ybfu5hnzarg7jomak3q6kyhkzjsl4qj24fyoq",
             "servingType": "ON_DEMAND"
         },
         "inferenceRequest": {
@@ -286,12 +286,12 @@ def cohere_chat(prompt, chatHistory, documents):
 
     compartmentId = os.getenv("TF_VAR_compartment_ocid")
     endpoint = 'https://inference.generativeai.us-chicago-1.oci.oraclecloud.com/20231130/actions/chat'
-    #         "modelId": "ocid1.generativeaimodel.oc1.us-chicago-1.amaaaaaask7dceyafhwal37hxwylnpbcncidimbwteff4xha77n5xz4m7p6a",
-    #         "modelId": "cohere.command-r-plus-08-2024",
+    #         "modelId": "ocid1.generativeaimodel.oc1.us-chicago-1.amaaaaaask7dceyanrlpnq5ybfu5hnzarg7jomak3q6kyhkzjsl4qj24fyoq",
+    #         "modelId": "cohere.command-r-08-2024",
     body = { 
         "compartmentId": compartmentId,
         "servingMode": {
-            "modelId": "cohere.command-r-plus-08-2024",
+            "modelId": "ocid1.generativeaimodel.oc1.us-chicago-1.amaaaaaask7dceyanrlpnq5ybfu5hnzarg7jomak3q6kyhkzjsl4qj24fyoq",
             "servingType": "ON_DEMAND"
         },
         "chatRequest": {
